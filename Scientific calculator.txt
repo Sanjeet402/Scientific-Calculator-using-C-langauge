@@ -1,689 +1,179 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Customer Management</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <style>
-        body {
-            display: flex;
-            justify-content: center; /* Centers content horizontally */
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            background: #f9f9f9;
-        }
-
-        .container {
-            max-width: 7000px;
-            width: 100%; /* Responsive */
-            background: white;
-            padding: 30px 40px;
-            border-radius: 8px;
-            box-shadow: 0 0 12px rgba(0,0,0,0.05);
-        }
-
-        .input-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 18px;
-            flex-wrap: wrap; /* Wrap on smaller screens */
-        }
-
-        .form-label-custom {
-            min-width: 140px;
-            font-weight: bold;
-            text-align: right;
-            margin-right: 20px;
-            font-size: 1.1rem;
-            flex-shrink: 0;
-        }
-
-        .input-wrap {
-            flex: 1 1 300px; /* Grow, shrink, base width 300px */
-        }
-
-        input.form-control,
-        select.form-select {
-            width: 100%; /* full width of input-wrap */
-            font-size: 1.1rem;
-            height: 44px;
-            padding: 0 12px;
-            box-sizing: border-box;
-            border-radius: 4px;
-            border: 1px solid #ced4da;
-            transition: border-color 0.3s ease-in-out;
-        }
-
-        input.form-control:focus,
-        select.form-select:focus {
-            border-color: #86b7fe;
-            outline: 0;
-            box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25);
-        }
-
-        .btn-align-left {
-            margin-left: 160px; /* Align with input fields */
-            margin-top: 10px;
-            font-size: 1.15rem;
-            padding: 8px 28px;
-            cursor: pointer;
-        }
-
-        .error-message {
-            color: red;
-            font-size: 0.9rem;
-            margin-top: 4px;
-            min-height: 18px;
-        }
-
-        h3, h4 {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        table#customerTable {
-            width: 100%;
-            font-size: 1rem;
-            margin-top: 35px;
-        }
-
-        @media (max-width: 640px) {
-            .input-row {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .form-label-custom {
-                text-align: left;
-                margin-bottom: 6px;
-                min-width: auto;
-            }
-            .btn-align-left {
-                margin-left: 0;
-            }
-        }
-    </style>
-</head>
-<body>
-<div class="container">
-    <h3>Add Customer</h3>
-    <form id="customerForm" novalidate>
-        <div class="input-row">
-            <label for="name" class="form-label-custom">Name:</label>
-            <div class="input-wrap">
-                <input type="text" class="form-control" id="name" placeholder="Enter Name" />
-                <div id="nameError" class="error-message"></div>
-            </div>
-        </div>
-        <div class="input-row">
-            <label for="email" class="form-label-custom">Email Id:</label>
-            <div class="input-wrap">
-                <input type="email" class="form-control" id="email" placeholder="Enter email" />
-                <div id="emailError" class="error-message"></div>
-            </div>
-        </div>
-        <div class="input-row">
-            <label for="contact" class="form-label-custom">Contact No:</label>
-            <div class="input-wrap">
-                <input type="text" class="form-control" id="contact" placeholder="Enter contact no" maxlength="10" />
-                <div id="contactError" class="error-message"></div>
-            </div>
-        </div>
-        <div class="input-row">
-            <label for="accountType" class="form-label-custom">Account Type:</label>
-            <div class="input-wrap">
-                <select class="form-select" id="accountType">
-                    <option value="">Select account type</option>
-                    <option value="savings">Savings</option>
-                    <option value="current">Current</option>
-                </select>
-                <div id="accountTypeError" class="error-message"></div>
-            </div>
-        </div>
-        <button type="button" id="addCustomerBtn" class="btn btn-primary btn-align-left">Add Customer</button>
-    </form>
-
-    <h4>Customer List</h4>
-    <table class="table table-bordered" id="customerTable">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Contact</th>
-                <th>Account Type</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Rows added here -->
-        </tbody>
-    </table>
-</div>
-
-<script>
-    const nameInput = document.getElementById('name');
-    const emailInput = document.getElementById('email');
-    const contactInput = document.getElementById('contact');
-    const accountTypeInput = document.getElementById('accountType');
-
-    const nameError = document.getElementById('nameError');
-    const emailError = document.getElementById('emailError');
-    const contactError = document.getElementById('contactError');
-    const accountTypeError = document.getElementById('accountTypeError');
-
-    const customerTableBody = document.querySelector('#customerTable tbody');
-
-    function validateName(name) {
-        return /^[A-Za-z\s]+$/.test(name);
-    }
-
-    function validateEmail(email) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    }
-
-    function validateContact(contact) {
-        return /^[7-9]\d{9}$/.test(contact);
-    }
-
-    function validateAccountType(accountType) {
-        return accountType !== "";
-    }
-
-    function clearErrors() {
-        nameError.textContent = '';
-        emailError.textContent = '';
-        contactError.textContent = '';
-        accountTypeError.textContent = '';
-    }
-
-    function addCustomerToTable(customer) {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${customer.name}</td>
-            <td>${customer.email}</td>
-            <td>${customer.contact}</td>
-            <td>${customer.accountType}</td>
-        `;
-        customerTableBody.appendChild(row);
-    }
-
-    document.getElementById('addCustomerBtn').addEventListener('click', () => {
-        clearErrors();
-
-        const name = nameInput.value.trim();
-        const email = emailInput.value.trim();
-        const contact = contactInput.value.trim();
-        const accountType = accountTypeInput.value;
-
-        let isValid = true;
-
-        if (!validateName(name)) {
-            nameError.textContent = 'Please enter only alphabets';
-            isValid = false;
-        }
-        if (!validateEmail(email)) {
-            emailError.textContent = 'Please enter a valid email id';
-            isValid = false;
-        }
-        if (!validateContact(contact)) {
-            contactError.textContent = 'Contact no should be 10 digits and start with 7-9';
-            isValid = false;
-        }
-        if (!validateAccountType(accountType)) {
-            accountTypeError.textContent = 'Please select an account type';
-            isValid = false;
-        }
-
-        if (isValid) {
-            const customer = { name, email, contact, accountType };
-            addCustomerToTable(customer);
-            document.getElementById('customerForm').reset();
-        }
-    });
-</script>
-</body>
-</html>
-
-
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Standard Chartered</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Arial', sans-serif;
-            background: #000;
-            color: white;
-            overflow-x: hidden;
-            height: 100vh;
-        }
-
-        .top-nav {
-            position: absolute;
-            right: 5px;
-            background: rgba(3, 2, 2, 0.726);
-            backdrop-filter: blur(10px);
-            border-bottom-left-radius: 12px;
-            gap: 15px;
-            padding: 8px 20px;
-            z-index: 1000;
-            width: 600px;
-        }
-
-        .top-nav a {
-            color: white;
-            text-decoration: none;
-            padding: 6px 12px;
-            border-right: 1px solid rgba(255, 255, 255, 0.2);
-            transition: color 0.3s;
-            font-size: 11.5px;
-            white-space: nowrap;
-        }
-
-        .top-nav a:last-child {
-            border-right: none;
-        }
-
-        .top-nav a:hover {
-            color: #00a651;
-        }
-
-        .main-navbar {
-            position: absolute;
-            padding-top: 22px;
-            display: flex;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-bottom-left-radius: 12px;
-            border-bottom-right-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            z-index: 999;
-            width: 92rem;
-            margin: 0 40px;
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            margin-left: 80px;
-            margin-right: 10px;
-        }
-
-        .logo-text {
-            font-size: 16px;
-            font-weight: 400;
-            color: #333;
-            line-height: 1.1;
-        }
-
-        .logo-text strong {
-            font-weight: 600;
-        }
-
-        .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 60px;
-            flex: 1;
-            margin-left: -225px;
-            margin-right: 25px;
-            justify-content: flex-end;
-        }
-
-        .nav-link {
-            color: #000 !important;
-            text-decoration: none;
-            font-size: 15px;
-            font-weight: 500;
-            transition: color 0.3s;
-            white-space: nowrap;
-        }
-
-        .nav-link:hover {
-            color: #00a651 !important;
-        }
-
-        .search-icon {
-            font-size: 20px;
-            color: blue;
-            cursor: pointer;
-            transition: color 0.3s;
-            margin-left: -45px;
-        }
-
-        .search-icon:hover {
-            color: #00a651;
-        }
-
-        .hero {
-            height: 100vh;
-            background:
-                linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
-                url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 0 20px;
-            position: relative;
-        }
-
-        .hero-content {
-            max-width: 800px;
-            margin-top: 80px;
-        }
-
-        .hero h1 {
-            font-size: 3.5rem;
-            font-weight: 400;
-            margin-bottom: 25px;
-            line-height: 1.2;
-        }
-
-        .hero h1 .blue {
-            display: inline-block;
-            width: 25px;
-            height: 24px;
-            background-color: blue;
-            border-radius: 100% 0 100% 100%;
-            transform: rotate(45deg);
-            vertical-align: middle;
-        }
-
-        .hero h1 .green {
-            display: inline-block;
-            width: 25px;
-            height: 25px;
-            background-color: #00a651;
-            border-radius: 50% 0 50% 50%;
-            transform: rotate(220deg);
-            vertical-align: middle;
-        }
-
-        .hero p {
-            font-size: 20px;
-            margin-bottom: 35px;
-            color: rgba(255, 255, 255, 0.9);
-            line-height: 1.6;
-        }
-
-        .btn-learn {
-            background: #007bff;
-            color: white;
-            padding: 14px 40px;
-            font-weight: bold;
-            font-size: 18px;
-            border-radius: 30px;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.3s;
-            border: none;
-        }
-
-        .btn-learn span {
-            margin-left: 20px;
-        }
-
-        .btn-learn:hover {
-            background: #0056b3;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0, 123, 255, 0.3);
-        }
-
-        .green-circle {
-            position: absolute;
-            bottom: 30px;
-            left: 30px;
-            width: 60px;
-            height: 60px;
-            background: #00a651;
-            border-radius: 50%;
-            z-index: 100;
-            opacity: 0.8;
-        }
-
-        .mobile-menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            color: #333;
-            font-size: 20px;
-            padding: 5px;
-        }
-
-        .mobile-nav {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            z-index: 2000;
-            padding: 20px;
-            overflow: scroll;
-        }
-
-        .mobile-nav.active {
-            display: block;
-        }
-
-        .mobile-nav-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        }
-
-        .mobile-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: #333;
-        }
-
-        .mobile-nav-links {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .mobile-nav-links a {
-            color: #333;
-            text-decoration: none;
-            font-size: 16px;
-            font-weight: 500;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        }
-
-        @media (max-width: 1516px) {
-            .top-nav {
-                display: none;
-            }
-
-            .main-navbar {
-                top: 20px;
-                padding: 15px 20px;
-                width: calc(100% - 40px);
-                max-width: none;
-                margin: 0 20px;
-            }
-
-            .logo-container {
-                margin-left: 0;
-            }
-
-            .nav-links {
-                display: none;
-            }
-
-            .mobile-menu-btn {
-                display: block;
-                margin-left: auto;
-            }
-
-            .hero h1 {
-                font-size: 2.2rem;
-            }
-
-            .mobile-res {
-                display: none;
-            }
-
-            .hero p {
-                font-size: 1rem;
-            }
-
-            .btn-learn {
-                padding: 12px 25px;
-                font-size: 14px;
-            }
-
-            .green-circle {
-                width: 40px;
-                height: 40px;
-                bottom: 20px;
-                left: 20px;
-            }
-        }
-
-        @media (max-width: 1516px) {
-            .top-nav {
-                display: none;
-            }
-
-            .hero h1 {
-                font-size: 1.8rem;
-            }
-
-            .logo-text {
-                font-size: 14px;
-            }
-
-            .main-navbar {
-                padding: 12px 15px;
-                margin: 0 10px;
-                width: calc(100% - 20px);
-            }
-        }
-    </style>
-</head>
-
-<body>
-    <div class="container-fluid p-0">
-        <div id="mobile-res" class="top-nav">
-            <a href="#" class="text-decoration-none">Online banking</a>
-            <a href="#" class="text-decoration-none">Private banking online</a>
-            <a href="#" class="text-decoration-none">Straight2Bank</a>
-            <a href="#" class="text-decoration-none">Local sites</a>
-            <a href="#" class="text-decoration-none">Contact us</a>
-        </div>
-
-        <nav class="main-navbar">
-            <div class="logo-container">
-                <img class="img-fluid" width="150" height="100" src="../Standard-Chartered-Logo.png" alt="Logo">
-            </div>
-
-            <div class="nav-links">
-                <a class="nav-link" href="#">About us</a>
-                <a class="nav-link" href="#">Corporate & Investment</a>
-                <a class="nav-link" href="#">Wealth & Retail</a>
-                <a class="nav-link" href="#">Ventures</a>
-                <a class="nav-link" href="#">Investors</a>
-                <a class="nav-link" href="#">Insights</a>
-                <a class="nav-link" href="#">Media</a>
-                <a class="nav-link" href="#">Careers</a>
-                <i class="fas fa-search search-icon"></i>
-            </div>
-
-            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
-                <i class="fas fa-bars"></i>
-            </button>
-        </nav>
-
-        <div class="mobile-nav" id="mobileNav">
-            <div class="mobile-nav-header">
-                <div class="d-flex align-items-center">
-                    <img class="img-fluid" width="145" height="110" src="../Standard-Chartered-Logo.png" alt="Logo">
-                </div>
-                <button class="mobile-close" onclick="toggleMobileMenu()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <div class="mobile-nav-links">
-                <a href="#" class="text-decoration-none">Online banking</a>
-                <a href="#" class="text-decoration-none">Private banking online</a>
-                <a href="#" class="text-decoration-none">Straight2Bank</a>
-                <a href="#" class="text-decoration-none">Local sites</a>
-                <a href="#" class="text-decoration-none">Contact us</a>
-                <a href="#" class="text-decoration-none">About us</a>
-                <a href="#" class="text-decoration-none">Corporate & Investment</a>
-                <a href="#" class="text-decoration-none">Wealth & Retail</a>
-                <a href="#" class="text-decoration-none">Ventures</a>
-                <a href="#" class="text-decoration-none">Investors</a>
-                <a href="#" class="text-decoration-none">Insights</a>
-                <a href="#" class="text-decoration-none">Media</a>
-                <a href="#" class="text-decoration-none">Careers</a>
-                <div class="mt-3">
-                    <i class="fas fa-search" style="color: #333; font-size: 18px;"></i>
-                </div>
-            </div>
-        </div>
-
-        <section class="hero">
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-lg-8">
-                        <div class="hero-content text-center">
-                            <h1 class="display-4 mb-4">
-                                <span class="blue"></span> From here, possibilities are everywhere <span
-                                    class="green"></span>
-                            </h1>
-                            <p class="lead mb-4">
-                                We're here to connect your potential to possibilities in the world's most <br> dynamic
-                                markets.
-                            </p>
-                            <a href="#" class="btn btn-learn">Learn how <span>></span></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="green-circle"></div>
-        </section>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function toggleMobileMenu() {
-            const mobileNav = document.getElementById('mobileNav');
-            mobileNav.classList.toggle('active');
-        }
-
-        document.addEventListener('click', function (e) {
-            const mobileNav = document.getElementById('mobileNav');
-            const menuBtn = document.querySelector('.mobile-menu-btn');
-
-            if (!mobileNav.contains(e.target) && !menuBtn.contains(e.target)) {
-                mobileNav.classList.remove('active');
-            }
-        });
-    </script>
-</body>
-
-</html>
+#include<stdio.h>
+#include<conio.h>
+#include<math.h>
+
+int main(void) {
+int choice, i, a, b;
+float x, y, result;
+clrscr();
+do {
+printf(“\nSelect your operation (0 to exit):\n”);
+printf(“1. Addition\n2. Subtraction\n3. Multiplication\n4. Division\n”);
+printf(“5. Square root\n6. X ^ Y\n7. X ^ 2\n8. X ^ 3\n”);
+printf(“9. 1 / X\n10. X ^ (1 / Y)\n11. X ^ (1 / 3)\n”);
+printf(“12. 10 ^ X\n13. X!\n14. %\n15. log10(x)\n16. Modulus\n”);
+printf(“17. Sin(X)\n18. Cos(X)\n19. Tan(X)\n20. Cosec(X)\n”);
+printf(“21. Cot(X)\n22. Sec(X)\n”);
+printf(“Choice: “);
+scanf(“%d”, &choice);
+if(choice == 0) exit(0);
+switch(choice) {
+case 1:
+printf(“Enter X: “);
+scanf(“%f”, &x);
+printf(“\nEnter Y: “);
+scanf(“%f”, &y);
+result = x + y;
+printf(“\nResult: %f”, result);
+break;
+case 2:
+printf(“Enter X: “);
+scanf(“%f”, &x);
+printf(“\nEnter Y: “);
+scanf(“%f”, &y);
+result = x – y;
+printf(“\nResult: %f”, result);
+break;
+case 3:
+printf(“Enter X: “);
+scanf(“%f”, &x);
+printf(“\nEnter Y: “);
+scanf(“%f”, &y);
+result = x * y;
+printf(“\nResult: %f”, result);
+break;
+case 4:
+printf(“Enter X: “);
+scanf(“%f”, &x);
+printf(“\nEnter Y: “);
+scanf(“%f”, &y);
+result = x / y;
+printf(“\nResult: %f”, result);
+break;
+case 5:
+printf(“Enter X: “);
+scanf(“%f”, &x);
+result = sqrt(x);
+printf(“\nResult: %f”, result);
+break;
+case 6:
+printf(“Enter X: “);
+scanf(“%f”, &x);
+printf(“\nEnter Y: “);
+scanf(“%f”, &y);
+result = pow(x, y);
+printf(“\nResult: %f”, result);
+break;
+case 7:
+printf(“Enter X: “);
+scanf(“%f”, &x);
+result = pow(x, 2);
+printf(“\nResult: %f”, result);
+break;
+case 8:
+printf(“Enter X: “);
+scanf(“%f”, &x);
+result = pow(x, 3);
+printf(“\nResult: %f”, result);
+break;
+case 9:
+printf(“Enter X: “);
+scanf(“%f”, &x);
+result = pow(x, -1);
+printf(“\nResult: %f”, result);
+break;
+case 10:
+printf(“Enter X: “);
+scanf(“%f”, &x);
+printf(“\nEnter Y: “);
+scanf(“%f”, &y);
+result = pow(x, (1/y));
+printf(“\nResult: %f”, result);
+break;
+case 11:
+printf(“Enter X: “);
+scanf(“%f”, &x);
+y = 3;
+result = pow(x, (1/y));
+printf(“\nResult: %f”, result);
+break;
+case 12:
+printf(“Enter X: “);
+scanf(“%f”, &x);
+result = pow(10, x);
+printf(“\nResult: %f”, result);
+break;
+case 13:
+printf(“Enter X: “);
+scanf(“%f”, &x);
+result = 1;
+for(i = 1; i <= x; i++) {
+result = result * i;
+}
+printf(“\nResult: %.f”, result);
+break;
+case 14:
+printf(“Enter X: “);
+scanf(“%f”, &x);
+printf(“\nEnter Y: “);
+scanf(“%f”, &y);
+result = (x * y) / 100;
+printf(“\nResult: %.2f”, result);
+break;
+case 15:
+printf(“Enter X: “);
+scanf(“%f”, &x);
+result = log10(x);
+printf(“\nResult: %.2f”, result);
+break;
+case 16:
+printf(“Enter X: “);
+scanf(“%d”, &a);
+printf(“\nEnter Y: “);
+scanf(“%d”, &b);
+result = a % b;
+printf(“\nResult: %d”, result);
+break;
+case 17:
+printf(“Enter X: “);
+scanf(“%f”, &x);
+result = sin(x * 3.14159 / 180);
+printf(“\nResult: %.2f”, result);
+break;
+case 18:
+printf(“Enter X: “);
+scanf(“%f”, &x);
+result = cos(x * 3.14159 / 180);
+printf(“\nResult: %.2f”, result);
+break;
+case 19:
+printf(“Enter X: “);
+scanf(“%f”, &x);
+result = tan(x * 3.14159 / 180);
+printf(“\nResult: %.2f”, result);
+break;
+case 20:
+printf(“Enter X: “);
+scanf(“%f”, &x);
+result = 1 / (sin(x * 3.14159 / 180));
+printf(“\nResult: %.2f”, result);
+break;
+case 21:
+printf(“Enter X: “);
+scanf(“%f”, &x);
+result = 1 / tan(x * 3.14159 / 180);
+printf(“\nResult: %.2f”, result);
+break;
+case 22:
+printf(“Enter X: “);
+scanf(“%f”, &x);
+result = 1 / cos(x * 3.14159 / 180);
+printf(“\nResult: %.2f”, result);
+break;
+default:
+printf(“\nInvalid Choice!”);
+}
+} while(choice);
+getch();
+return 0;
+}
