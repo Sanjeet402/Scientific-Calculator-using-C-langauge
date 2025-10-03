@@ -1,181 +1,234 @@
-#include<stdio.h>
-#include<conio.h>
-#include<math.h>
-
-int main(void) {
-int choice, i, a, b;
-float x, y, result;
-clrscr();
-do {
-printf(“\nSelect your operation (0 to exit):\n”);
-printf(“1. Addition\n2. Subtraction\n3. Multiplication\n4. Division\n”);
-printf(“5. Square root\n6. X ^ Y\n7. X ^ 2\n8. X ^ 3\n”);
-printf(“9. 1 / X\n10. X ^ (1 / Y)\n11. X ^ (1 / 3)\n”);
-printf(“12. 10 ^ X\n13. X!\n14. %\n15. log10(x)\n16. Modulus\n”);
-printf(“17. Sin(X)\n18. Cos(X)\n19. Tan(X)\n20. Cosec(X)\n”);
-printf(“21. Cot(X)\n22. Sec(X)\n”);
-printf(“Choice: “);
-scanf(“%d”, &choice);
-if(choice == 0) exit(0);
-switch(choice) {
-case 1:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-printf(“\nEnter Y: “);
-scanf(“%f”, &y);
-result = x + y;
-printf(“\nResult: %f”, result);
-break;
-case 2:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-printf(“\nEnter Y: “);
-scanf(“%f”, &y);
-result = x – y;
-printf(“\nResult: %f”, result);
-break;
-case 3:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-printf(“\nEnter Y: “);
-scanf(“%f”, &y);
-result = x * y;
-printf(“\nResult: %f”, result);
-break;
-case 4:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-printf(“\nEnter Y: “);
-scanf(“%f”, &y);
-result = x / y;
-printf(“\nResult: %f”, result);
-break;
-case 5:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = sqrt(x);
-printf(“\nResult: %f”, result);
-break;
-case 6:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-printf(“\nEnter Y: “);
-scanf(“%f”, &y);
-result = pow(x, y);
-printf(“\nResult: %f”, result);
-break;
-case 7:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = pow(x, 2);
-printf(“\nResult: %f”, result);
-break;
-case 8:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = pow(x, 3);
-printf(“\nResult: %f”, result);
-break;
-case 9:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = pow(x, -1);
-printf(“\nResult: %f”, result);
-break;
-case 10:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-printf(“\nEnter Y: “);
-scanf(“%f”, &y);
-result = pow(x, (1/y));
-printf(“\nResult: %f”, result);
-break;
-case 11:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-y = 3;
-result = pow(x, (1/y));
-printf(“\nResult: %f”, result);
-break;
-case 12:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = pow(10, x);
-printf(“\nResult: %f”, result);
-break;
-case 13:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = 1;
-for(i = 1; i <= x; i++) {
-result = result * i;
-}
-printf(“\nResult: %.f”, result);
-break;
-case 14:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-printf(“\nEnter Y: “);
-scanf(“%f”, &y);
-result = (x * y) / 100;
-printf(“\nResult: %.2f”, result);
-break;
-case 15:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = log10(x);
-printf(“\nResult: %.2f”, result);
-break;
-case 16:
-printf(“Enter X: “);
-scanf(“%d”, &a);
-printf(“\nEnter Y: “);
-scanf(“%d”, &b);
-result = a % b;
-printf(“\nResult: %d”, result);
-break;
-case 17:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = sin(x * 3.14159 / 180);
-printf(“\nResult: %.2f”, result);
-break;
-case 18:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = cos(x * 3.14159 / 180);
-printf(“\nResult: %.2f”, result);
-break;
-case 19:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = tan(x * 3.14159 / 180);
-printf(“\nResult: %.2f”, result);
-break;
-case 20:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = 1 / (sin(x * 3.14159 / 180));
-printf(“\nResult: %.2f”, result);
-break;
-case 21:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = 1 / tan(x * 3.14159 / 180);
-printf(“\nResult: %.2f”, result);
-break;
-case 22:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = 1 / cos(x * 3.14159 / 180);
-printf(“\nResult: %.2f”, result);
-break;
-default:
-printf(“\nInvalid Choice!”);
-}
-} while(choice);
-getch();
-return 0;
-}
+[
+  { "id": 1, "firstName": "Sundar", "lastName": "Pichai", "email": "sundar.pichai@google.com" },
+  { "id": 2, "firstName": "Satya", "lastName": "Nadella", "email": "satya.nadella@microsoft.com" },
+  { "id": 3, "firstName": "Jeff", "lastName": "Bezos", "email": "jeff.bezos@amazon.com" },
+  { "id": 4, "firstName": "Sergey", "lastName": "Brin", "email": "sergey.brin@google.com" },
+  { "id": 5, "firstName": "Larry", "lastName": "Page", "email": "larry.page@google.com" }
+]
 
 
+
+import { useState } from "react";
+// Assuming customers.json is in the correct path relative to components
+import initialCustomers from "../assets/customers.json"; 
+import CustomerDetails from "./CustomerDetails";
+import CustomerForm from "./CustomerForm";
+
+function CustomerList() {
+    // FIX 1: Use initialCustomers data for the list
+    const [customers, setCustomers] = useState(initialCustomers);
+    
+    // FIX 2: Add a separate state for the currently selected customer
+    const [selectedCustomer, setSelectedCustomer] = useState({});
+
+    // Handler to update the selectedCustomer state when a table row is clicked
+    const onCustomerSelect = (e, customer) => {
+        e.preventDefault();
+        // FIX 3: Use the setter for the selected customer
+        setSelectedCustomer(customer); 
+    };
+
+    // Handler to add a new customer to the list
+    const addCustomer = (newCustomer) => {
+        // Create a new customer object with a unique ID
+        const newId = customers.length > 0 ? Math.max(...customers.map(c => c.id)) + 1 : 1;
+        const customerWithId = { ...newCustomer, id: newId };
+        
+        // FIX 4: Correctly update the list state by appending the new customer
+        setCustomers([...customers, customerWithId]);
+        
+        // Optionally select the newly added customer
+        setSelectedCustomer(customerWithId);
+    };
+
+    // --- Rendering Logic for the Table Rows ---
+    // tabRows now uses the 'customers' list state
+    const tabRows = customers.map((customer) => {
+        return (
+            <tr 
+                key={customer.id} 
+                onClick={(e) => onCustomerSelect(e, customer)}
+                // Optional: Highlight the selected row
+                className={selectedCustomer.id === customer.id ? "table-active" : ""}
+                style={{ cursor: 'pointer' }}
+            >
+                <td>{customer.id}</td>
+                <td>{customer.firstName}</td>
+                <td>{customer.lastName}</td>
+                <td>{customer.email}</td>
+            </tr>
+        );
+    });
+
+    return (
+        // Added 'container' for margins as seen in UI
+        <div className="container mt-4"> 
+            
+            {/* Customer List Table */}
+            <div className="row">
+                <div className="col-12">
+                    <h1>Customers List</h1>
+                    {/* Your table code block */}
+                    <table className="table table-hover table-bordered table-sm">
+                        <thead className="thead-light">
+                            <tr>
+                                <th>Id</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Email</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {tabRows}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {/* Layout for Form and Details (Two Columns) */}
+            <div className="row mt-4">
+                
+                {/* Left side: Add Customer Form */}
+                <div className="col-md-6">
+                    <h2>Add Customer</h2>
+                    <CustomerForm addCustomer={addCustomer} />
+                </div>
+                
+                {/* Right side: Customer Details */}
+                <div className="col-md-6">
+                    <h2>Customer Details</h2>
+                    {/* FIX 5: Pass the selectedCustomer state */}
+                    <CustomerDetails customer={selectedCustomer} />
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default CustomerList;
+
+
+
+
+
+import { useState } from 'react';
+
+function CustomerForm(props) {
+    // State for the form inputs
+    const [customer, setCustomer] = useState({
+        firstName: "",
+        lastName: "",
+        email: ""
+    });
+
+    // Function to reset the form state
+    const resetForm = () => {
+        setCustomer({
+            firstName: "",
+            lastName: "",
+            email: ""
+        });
+    };
+
+    // Updates state whenever an input field changes
+    const handleInputChange = (e) => {
+        setCustomer({
+            ...customer,
+            // Uses the input's 'name' attribute to set the corresponding state key
+            [e.target.name]: e.target.value 
+        });
+    };
+
+    // Handles form submission
+    const handleFormSubmit = (e) => {
+        e.preventDefault();
+        
+        // 1. Call the addCustomer function passed from CustomerList
+        props.addCustomer(customer); 
+
+        // 2. Clear the form after adding the customer (FIX)
+        resetForm();
+    };
+
+    return (
+        <div>
+            <h1>Customer Form</h1>
+            <form onSubmit={handleFormSubmit}> 
+                
+                {/* First Name Input */}
+                <div className="form-group mb-3">
+                    <label htmlFor="firstName">First Name</label>
+                    <input 
+                        type="text" 
+                        id="firstName"
+                        name="firstName" 
+                        value={customer.firstName}
+                        onChange={handleInputChange} 
+                        className="form-control"
+                    />
+                </div>
+
+                {/* Last Name Input */}
+                <div className="form-group mb-3">
+                    <label htmlFor="lastName">Last Name</label>
+                    <input 
+                        type="text" 
+                        id="lastName"
+                        name="lastName" 
+                        value={customer.lastName}
+                        onChange={handleInputChange} 
+                        className="form-control"
+                    />
+                </div>
+
+                {/* Email Input */}
+                <div className="form-group mb-3">
+                    <label htmlFor="email">Email</label>
+                    <input 
+                        type="email" 
+                        id="email"
+                        name="email" 
+                        value={customer.email}
+                        onChange={handleInputChange} 
+                        className="form-control"
+                    />
+                </div>
+                
+                <button type="submit" className="btn btn-primary">
+                    Submit
+                </button>
+            </form>
+        </div>
+    );
+}
+
+export default CustomerForm;
+
+
+
+function CustomerDetails(props) {
+    const customer = props.customer;
+
+    // Check if the customer object is empty
+    if (!customer || Object.keys(customer).length === 0) {
+        return (
+            <div className="p-3 text-muted">
+                <p>Click a row in the Customer List to view details.</p>
+            </div>
+        );
+    }
+    
+    return (
+        <div className="p-3">
+            <h1>Customer Details</h1>
+            <p>ID : {props.customer.id}</p>
+            {/* FIX 1: Corrected mappings */}
+            <p>First Name : {props.customer.firstName}</p>
+            <p>Last Name : {props.customer.lastName}</p>
+            <p>Email: {props.customer.email}</p>
+            {/* Removed "Phone" as it's not in the data structure */}
+        </div>
+    );
+}
+
+export default CustomerDetails;
