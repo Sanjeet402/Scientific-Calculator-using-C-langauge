@@ -1,181 +1,523 @@
-#include<stdio.h>
-#include<conio.h>
-#include<math.h>
+html1:
 
-int main(void) {
-int choice, i, a, b;
-float x, y, result;
-clrscr();
-do {
-printf(“\nSelect your operation (0 to exit):\n”);
-printf(“1. Addition\n2. Subtraction\n3. Multiplication\n4. Division\n”);
-printf(“5. Square root\n6. X ^ Y\n7. X ^ 2\n8. X ^ 3\n”);
-printf(“9. 1 / X\n10. X ^ (1 / Y)\n11. X ^ (1 / 3)\n”);
-printf(“12. 10 ^ X\n13. X!\n14. %\n15. log10(x)\n16. Modulus\n”);
-printf(“17. Sin(X)\n18. Cos(X)\n19. Tan(X)\n20. Cosec(X)\n”);
-printf(“21. Cot(X)\n22. Sec(X)\n”);
-printf(“Choice: “);
-scanf(“%d”, &choice);
-if(choice == 0) exit(0);
-switch(choice) {
-case 1:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-printf(“\nEnter Y: “);
-scanf(“%f”, &y);
-result = x + y;
-printf(“\nResult: %f”, result);
-break;
-case 2:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-printf(“\nEnter Y: “);
-scanf(“%f”, &y);
-result = x – y;
-printf(“\nResult: %f”, result);
-break;
-case 3:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-printf(“\nEnter Y: “);
-scanf(“%f”, &y);
-result = x * y;
-printf(“\nResult: %f”, result);
-break;
-case 4:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-printf(“\nEnter Y: “);
-scanf(“%f”, &y);
-result = x / y;
-printf(“\nResult: %f”, result);
-break;
-case 5:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = sqrt(x);
-printf(“\nResult: %f”, result);
-break;
-case 6:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-printf(“\nEnter Y: “);
-scanf(“%f”, &y);
-result = pow(x, y);
-printf(“\nResult: %f”, result);
-break;
-case 7:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = pow(x, 2);
-printf(“\nResult: %f”, result);
-break;
-case 8:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = pow(x, 3);
-printf(“\nResult: %f”, result);
-break;
-case 9:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = pow(x, -1);
-printf(“\nResult: %f”, result);
-break;
-case 10:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-printf(“\nEnter Y: “);
-scanf(“%f”, &y);
-result = pow(x, (1/y));
-printf(“\nResult: %f”, result);
-break;
-case 11:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-y = 3;
-result = pow(x, (1/y));
-printf(“\nResult: %f”, result);
-break;
-case 12:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = pow(10, x);
-printf(“\nResult: %f”, result);
-break;
-case 13:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = 1;
-for(i = 1; i <= x; i++) {
-result = result * i;
-}
-printf(“\nResult: %.f”, result);
-break;
-case 14:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-printf(“\nEnter Y: “);
-scanf(“%f”, &y);
-result = (x * y) / 100;
-printf(“\nResult: %.2f”, result);
-break;
-case 15:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = log10(x);
-printf(“\nResult: %.2f”, result);
-break;
-case 16:
-printf(“Enter X: “);
-scanf(“%d”, &a);
-printf(“\nEnter Y: “);
-scanf(“%d”, &b);
-result = a % b;
-printf(“\nResult: %d”, result);
-break;
-case 17:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = sin(x * 3.14159 / 180);
-printf(“\nResult: %.2f”, result);
-break;
-case 18:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = cos(x * 3.14159 / 180);
-printf(“\nResult: %.2f”, result);
-break;
-case 19:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = tan(x * 3.14159 / 180);
-printf(“\nResult: %.2f”, result);
-break;
-case 20:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = 1 / (sin(x * 3.14159 / 180));
-printf(“\nResult: %.2f”, result);
-break;
-case 21:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = 1 / tan(x * 3.14159 / 180);
-printf(“\nResult: %.2f”, result);
-break;
-case 22:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = 1 / cos(x * 3.14159 / 180);
-printf(“\nResult: %.2f”, result);
-break;
-default:
-printf(“\nInvalid Choice!”);
-}
-} while(choice);
-getch();
-return 0;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Payroll Payments</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <div class="top-nav">
+    <div class="nav-left">
+      <a class="back" href="#">&larr; Back</a>
+      <div class="brand">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="white" d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3z"></path>
+        </svg>
+        <span class="brand-text">Straight2Bank</span>
+      </div>
+      <span class="divider">|</span>
+      <span class="group">Group ID: CHET001</span>
+    </div>
+
+    <div class="nav-right">
+      <div class="search">
+        <input type="text" placeholder="Search" />
+        <button class="search-btn">Search</button>
+      </div>
+      <a class="nav-link" href="#">Need Help?</a>
+      <a class="nav-link" href="#">Logout</a>
+      <div class="welcome">Welcome TESTUSER</div>
+    </div>
+  </div>
+
+  <!-- Page banner/title -->
+  <div class="page-banner">Payroll Payments</div>
+
+  <!-- Payment Information Section -->
+  <div class="form-section">
+    <h3>Payment Information</h3>
+    <div class="form-row">
+      <label>Choose Account</label>
+      <select>
+        <option>Select Account</option>
+        <option>Account 1</option>
+        <option>Account 2</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Date</label>
+      <input type="date" />
+    </div>
+  </div>
+
+  <!-- Payment Details Section -->
+  <div class="form-section">
+    <h3>Payment Details</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Employee ID</th>
+          <th>Name</th>
+          <th>Salary Amount</th>
+          <th>Currency</th>
+          <th>Account Number</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>101</td><td>John</td><td class="amt">50000</td><td>INR</td><td>12345678</td><td class="delete-btn">🗑</td></tr>
+        <tr><td>102</td><td>Smith</td><td class="amt">40000</td><td>INR</td><td>12345679</td><td class="delete-btn">🗑</td></tr>
+        <tr><td>103</td><td>Peter</td><td class="amt">30000</td><td>INR</td><td>12345680</td><td class="delete-btn">🗑</td></tr>
+        <tr><td>104</td><td>Alice</td><td class="amt">45000</td><td>INR</td><td>12345681</td><td class="delete-btn">🗑</td></tr>
+        <tr><td>105</td><td>Michael</td><td class="amt">55000</td><td>INR</td><td>12345682</td><td class="delete-btn">🗑</td></tr>
+        <tr><td>106</td><td>Rachel</td><td class="amt">35000</td><td>INR</td><td>12345683</td><td class="delete-btn">🗑</td></tr>
+        <tr><td>107</td><td>David</td><td class="amt">60000</td><td>INR</td><td>12345684</td><td class="delete-btn">🗑</td></tr>
+        <tr class="add-row"><td colspan="6">+ Add Row</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Total Amount (bottom-left) -->
+    <div class="total-and-actions">
+      <div class="total-amount"><strong>Total Amount:</strong> INR 310000</div>
+      <div class="btn-row">
+        <button class="btn-cancel">Cancel</button>
+        <button class="btn-clear">Clear</button>
+        <button class="btn-submit">Submit For Approval</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
 
 
+css1:
+
+/* Base / body */
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #f5f5f5;
+  color: #222;
+}
+
+/* Top navigation */
+.top-nav {
+  background-color: #133d6b;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 18px;
+  font-size: 14px;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.08);
+}
+
+.nav-left, .nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-left .back {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  padding-right: 8px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.brand-text {
+  font-weight: 600;
+  color: #fff;
+}
+
+.divider {
+  color: rgba(255,255,255,0.35);
+  margin-left: 6px;
+}
+
+.nav-right .search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-right input[type="text"] {
+  padding: 6px 8px;
+  width: 180px;
+  border: 0;
+  border-radius: 3px;
+}
+
+.search-btn {
+  padding: 6px 10px;
+  border-radius: 3px;
+  border: none;
+  background: #e6e9ee;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.nav-link {
+  color: #fff;
+  text-decoration: none;
+  opacity: 0.95;
+  font-size: 13px;
+  padding-left: 8px;
+}
+
+.welcome {
+  padding-left: 8px;
+  font-weight: 600;
+}
+
+/* Page banner */
+.page-banner {
+  background: linear-gradient(90deg, #1a4c8b 0%, #2b6fb8 100%);
+  color: white;
+  text-align: center;
+  padding: 18px 10px;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* Sections */
+.form-section {
+  background: white;
+  margin: 20px;
+  padding: 20px;
+  border-radius: 4px;
+  box-shadow: 0 0 4px rgba(0,0,0,0.06);
+}
+
+h3 {
+  margin: 0 0 14px 0;
+  font-size: 16px;
+  color: #333;
+  font-weight: 700;
+}
+
+.form-row {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.form-row label {
+  width: 150px;
+  font-weight: 700;
+  color: #333;
+}
+
+.form-row select,
+.form-row input {
+  padding: 6px;
+  width: 220px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+/* Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+th {
+  background-color: #f2f4f7;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+td.amt {
+  text-align: right;
+  font-weight: 600;
+}
+
+tr:nth-child(even) {
+  background: #fafafa;
+}
+
+tr.add-row td {
+  text-align: center;
+  color: #006d77;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.delete-btn {
+  text-align: center;
+  cursor: pointer;
+}
+
+/* Totals and buttons */
+.total-and-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.total-amount {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.btn-row {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-cancel,
+.btn-clear,
+.btn-submit {
+  padding: 8px 16px;
+  border-radius: 3px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-cancel { background: #ccc; }
+.btn-clear { background: #ddd; }
+.btn-submit { background: #1a4c8b; color: white; }
+
+
+html2:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payroll Payments</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <div class="navbar">
+    <div>🏠 Straight2Bank</div>
+    <h1>Payroll Payments</h1>
+    <div>Welcome User</div>
+  </div>
+
+  <!-- Instruction Details Section -->
+  <div class="section">
+    <h2>Instruction Details</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="debitAccount">Debit Account</label>
+        <select id="debitAccount">
+          <option>Select Account</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="date">Date</label>
+        <input type="date" id="date">
+      </div>
+
+      <div class="form-group">
+        <label for="payrollType">Payroll Type</label>
+        <button class="upload-btn">Domestic</button>
+      </div>
+
+      <div class="form-group">
+        <label for="paymentCurrency">Payment Currency</label>
+        <select id="paymentCurrency">
+          <option>Select Currency</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Details Section -->
+  <div class="section">
+    <h2>
+      Payment Details
+      <button class="upload-btn">Upload File</button>
+    </h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Employee ID</th>
+          <th>Name</th>
+          <th>Salary Amount</th>
+          <th>Currency</th>
+          <th>Account Number</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td colspan="5" style="text-align:center; color:#888;">No records available</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Summary Section -->
+  <div class="section">
+    <h2>Summary</h2>
+    <div class="summary">
+      <span>Total Employees: ______</span>
+      <span>Total Debit Amount: ______</span>
+    </div>
+
+    <div class="btn-container">
+      <button class="btn">Submit for Approval</button>
+      <button class="btn">Save Draft</button>
+      <button class="btn">Clear Form</button>
+      <button class="btn">Cancel</button>
+    </div>
+  </div>
+
+</body>
+</html>
+
+css2:
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #E5E5E5;
+  margin: 0;
+  padding: 0;
+}
+
+/* Top Navigation Bar */
+.navbar {
+  background-color: #1E5CF3;
+  color: white;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.navbar h1 {
+  font-size: 20px;
+  margin: 0 auto;
+}
+
+/* Section Containers */
+.section {
+  background-color: white;
+  margin: 20px auto;
+  width: 90%;
+  border-radius: 6px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.section h2 {
+  font-size: 16px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+/* Form Layout */
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.form-group {
+  flex: 1;
+  min-width: 220px;
+  margin-right: 15px;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+input, select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Payment Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  text-align: left;
+  padding: 10px;
+}
+
+th {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
+/* Buttons */
+.btn-container {
+  text-align: right;
+  margin-top: 20px;
+}
+
+.btn {
+  background-color: #1E5CF3;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  margin-left: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+/* Upload & Type Button */
+.upload-btn {
+  background-color: #1E5CF3;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.upload-btn:hover {
+  opacity: 0.9;
+}
+
+/* Summary Row */
+.summary {
+  margin-top: 20px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+}
