@@ -1,523 +1,173 @@
-html1:
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
+import About from "./pages/About";
+import Customers from "./pages/Customers";
+import CustomerDetails from "./pages/CustomerDetails";
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Payroll Payments</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-
-  <!-- Top Navigation Bar -->
-  <div class="top-nav">
-    <div class="nav-left">
-      <a class="back" href="#">&larr; Back</a>
-      <div class="brand">
-        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-          <path fill="white" d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3z"></path>
-        </svg>
-        <span class="brand-text">Straight2Bank</span>
-      </div>
-      <span class="divider">|</span>
-      <span class="group">Group ID: CHET001</span>
-    </div>
-
-    <div class="nav-right">
-      <div class="search">
-        <input type="text" placeholder="Search" />
-        <button class="search-btn">Search</button>
-      </div>
-      <a class="nav-link" href="#">Need Help?</a>
-      <a class="nav-link" href="#">Logout</a>
-      <div class="welcome">Welcome TESTUSER</div>
-    </div>
-  </div>
-
-  <!-- Page banner/title -->
-  <div class="page-banner">Payroll Payments</div>
-
-  <!-- Payment Information Section -->
-  <div class="form-section">
-    <h3>Payment Information</h3>
-    <div class="form-row">
-      <label>Choose Account</label>
-      <select>
-        <option>Select Account</option>
-        <option>Account 1</option>
-        <option>Account 2</option>
-      </select>
-    </div>
-    <div class="form-row">
-      <label>Date</label>
-      <input type="date" />
-    </div>
-  </div>
-
-  <!-- Payment Details Section -->
-  <div class="form-section">
-    <h3>Payment Details</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Employee ID</th>
-          <th>Name</th>
-          <th>Salary Amount</th>
-          <th>Currency</th>
-          <th>Account Number</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>101</td><td>John</td><td class="amt">50000</td><td>INR</td><td>12345678</td><td class="delete-btn">🗑</td></tr>
-        <tr><td>102</td><td>Smith</td><td class="amt">40000</td><td>INR</td><td>12345679</td><td class="delete-btn">🗑</td></tr>
-        <tr><td>103</td><td>Peter</td><td class="amt">30000</td><td>INR</td><td>12345680</td><td class="delete-btn">🗑</td></tr>
-        <tr><td>104</td><td>Alice</td><td class="amt">45000</td><td>INR</td><td>12345681</td><td class="delete-btn">🗑</td></tr>
-        <tr><td>105</td><td>Michael</td><td class="amt">55000</td><td>INR</td><td>12345682</td><td class="delete-btn">🗑</td></tr>
-        <tr><td>106</td><td>Rachel</td><td class="amt">35000</td><td>INR</td><td>12345683</td><td class="delete-btn">🗑</td></tr>
-        <tr><td>107</td><td>David</td><td class="amt">60000</td><td>INR</td><td>12345684</td><td class="delete-btn">🗑</td></tr>
-        <tr class="add-row"><td colspan="6">+ Add Row</td></tr>
-      </tbody>
-    </table>
-
-    <!-- Total Amount (bottom-left) -->
-    <div class="total-and-actions">
-      <div class="total-amount"><strong>Total Amount:</strong> INR 310000</div>
-      <div class="btn-row">
-        <button class="btn-cancel">Cancel</button>
-        <button class="btn-clear">Clear</button>
-        <button class="btn-submit">Submit For Approval</button>
+function App() {
+  return (
+    <div>
+      <Navbar />
+      <div className="container" style={{ padding: "20px" }}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/customers" element={<Customers />} />
+          <Route path="/customers/:id" element={<CustomerDetails />} />
+        </Routes>
       </div>
     </div>
+  );
+}
+
+export default App;
+
+import React from "react";
+import { Link } from "react-router-dom";
+
+const Navbar = () => (
+  <nav style={{ background: "#004c91", padding: "10px" }}>
+    <ul style={{ display: "flex", listStyle: "none", gap: "20px", margin: 0, padding: 0 }}>
+      <li><Link to="/" style={{ color: "white", textDecoration: "none" }}>Home</Link></li>
+      <li><Link to="/customers" style={{ color: "white", textDecoration: "none" }}>Customers</Link></li>
+      <li><Link to="/about" style={{ color: "white", textDecoration: "none" }}>About</Link></li>
+    </ul>
+  </nav>
+);
+
+export default Navbar;
+
+import React from "react";
+
+const Home = () => (
+  <div>
+    <h2>Welcome to Topruns Bank</h2>
+    <p>
+      This banking app allows admins to manage customer records, view account details, 
+      and perform full CRUD operations in an easy-to-use interface.
+    </p>
   </div>
+);
 
-</body>
-</html>
+export default Home;
 
+import React from "react";
 
-css1:
-
-/* Base / body */
-body {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background-color: #f5f5f5;
-  color: #222;
-}
-
-/* Top navigation */
-.top-nav {
-  background-color: #133d6b;
-  color: #fff;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 18px;
-  font-size: 14px;
-  box-shadow: 0 1px 0 rgba(0,0,0,0.08);
-}
-
-.nav-left, .nav-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.nav-left .back {
-  color: #fff;
-  text-decoration: none;
-  font-weight: 500;
-  padding-right: 8px;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.brand-text {
-  font-weight: 600;
-  color: #fff;
-}
-
-.divider {
-  color: rgba(255,255,255,0.35);
-  margin-left: 6px;
-}
-
-.nav-right .search {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.nav-right input[type="text"] {
-  padding: 6px 8px;
-  width: 180px;
-  border: 0;
-  border-radius: 3px;
-}
-
-.search-btn {
-  padding: 6px 10px;
-  border-radius: 3px;
-  border: none;
-  background: #e6e9ee;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-.nav-link {
-  color: #fff;
-  text-decoration: none;
-  opacity: 0.95;
-  font-size: 13px;
-  padding-left: 8px;
-}
-
-.welcome {
-  padding-left: 8px;
-  font-weight: 600;
-}
-
-/* Page banner */
-.page-banner {
-  background: linear-gradient(90deg, #1a4c8b 0%, #2b6fb8 100%);
-  color: white;
-  text-align: center;
-  padding: 18px 10px;
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: 1px;
-}
-
-/* Sections */
-.form-section {
-  background: white;
-  margin: 20px;
-  padding: 20px;
-  border-radius: 4px;
-  box-shadow: 0 0 4px rgba(0,0,0,0.06);
-}
-
-h3 {
-  margin: 0 0 14px 0;
-  font-size: 16px;
-  color: #333;
-  font-weight: 700;
-}
-
-.form-row {
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.form-row label {
-  width: 150px;
-  font-weight: 700;
-  color: #333;
-}
-
-.form-row select,
-.form-row input {
-  padding: 6px;
-  width: 220px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-}
-
-/* Table */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-
-th, td {
-  border: 1px solid #ddd;
-  padding: 10px;
-  text-align: left;
-}
-
-th {
-  background-color: #f2f4f7;
-  font-weight: bold;
-  font-size: 14px;
-}
-
-td.amt {
-  text-align: right;
-  font-weight: 600;
-}
-
-tr:nth-child(even) {
-  background: #fafafa;
-}
-
-tr.add-row td {
-  text-align: center;
-  color: #006d77;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.delete-btn {
-  text-align: center;
-  cursor: pointer;
-}
-
-/* Totals and buttons */
-.total-and-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 16px;
-}
-
-.total-amount {
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.btn-row {
-  display: flex;
-  gap: 12px;
-}
-
-.btn-cancel,
-.btn-clear,
-.btn-submit {
-  padding: 8px 16px;
-  border-radius: 3px;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.btn-cancel { background: #ccc; }
-.btn-clear { background: #ddd; }
-.btn-submit { background: #1a4c8b; color: white; }
-
-
-html2:
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Payroll Payments</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-  <!-- Navbar -->
-  <div class="navbar">
-    <div>🏠 Straight2Bank</div>
-    <h1>Payroll Payments</h1>
-    <div>Welcome User</div>
+const About = () => (
+  <div>
+    <h2>About This Application</h2>
+    <p>
+      The Topruns Bank Customer Management System helps administrators efficiently
+      handle customer records. It supports Create, Read, Update, and Delete operations,
+      ensuring smooth data management within the banking system.
+    </p>
   </div>
+);
 
-  <!-- Instruction Details Section -->
-  <div class="section">
-    <h2>Instruction Details</h2>
-    <div class="form-row">
-      <div class="form-group">
-        <label for="debitAccount">Debit Account</label>
-        <select id="debitAccount">
-          <option>Select Account</option>
-        </select>
-      </div>
+export default About;
 
-      <div class="form-group">
-        <label for="date">Date</label>
-        <input type="date" id="date">
-      </div>
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-      <div class="form-group">
-        <label for="payrollType">Payroll Type</label>
-        <button class="upload-btn">Domestic</button>
-      </div>
+const initialData = [
+  { id: 1, firstName: "Sundar", lastName: "Pichai", email: "sundar@gmail.com" },
+  { id: 2, firstName: "John", lastName: "Doe", email: "john@gmail.com" },
+  { id: 3, firstName: "Satya", lastName: "Nadella", email: "satya@gmail.com" },
+  { id: 4, firstName: "Sergey", lastName: "Brin", email: "sergey@gmail.com" },
+  { id: 5, firstName: "Larry", lastName: "Page", email: "larry@gmail.com" },
+];
 
-      <div class="form-group">
-        <label for="paymentCurrency">Payment Currency</label>
-        <select id="paymentCurrency">
-          <option>Select Currency</option>
-        </select>
-      </div>
+const Customers = () => {
+  const [customers, setCustomers] = useState(initialData);
+  const [form, setForm] = useState({ id: "", firstName: "", lastName: "", email: "" });
+  const [isEdit, setIsEdit] = useState(false);
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (isEdit) {
+      setCustomers(customers.map((c) => (c.id === form.id ? form : c)));
+      setIsEdit(false);
+    } else {
+      setCustomers([...customers, { ...form, id: customers.length + 1 }]);
+    }
+    setForm({ id: "", firstName: "", lastName: "", email: "" });
+  };
+
+  const handleEdit = (customer) => {
+    setForm(customer);
+    setIsEdit(true);
+  };
+
+  const handleDelete = (id) => {
+    if (window.confirm("Are you sure you want to delete this customer?")) {
+      setCustomers(customers.filter((c) => c.id !== id));
+    }
+  };
+
+  return (
+    <div>
+      <h2>Customers List</h2>
+      <table border="1" cellPadding="8" width="100%">
+        <thead>
+          <tr>
+            <th>Id</th><th>First Name</th><th>Last Name</th><th>Email</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {customers.map((c) => (
+            <tr key={c.id}>
+              <td>{c.id}</td>
+              <td>{c.firstName}</td>
+              <td>{c.lastName}</td>
+              <td>{c.email}</td>
+              <td>
+                <button onClick={() => navigate(`/customers/${c.id}`)}>Show</button>{" "}
+                <button onClick={() => handleEdit(c)}>Edit</button>{" "}
+                <button onClick={() => handleDelete(c.id)}>Delete</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <h3>{isEdit ? "Edit Customer" : "Add New Customer"}</h3>
+      <form onSubmit={handleSubmit}>
+        <input name="firstName" value={form.firstName} onChange={handleChange} placeholder="First Name" required />{" "}
+        <input name="lastName" value={form.lastName} onChange={handleChange} placeholder="Last Name" required />{" "}
+        <input name="email" value={form.email} onChange={handleChange} placeholder="Email" required />{" "}
+        <button type="submit">{isEdit ? "Update" : "Create"}</button>
+      </form>
     </div>
-  </div>
+  );
+};
 
-  <!-- Payment Details Section -->
-  <div class="section">
-    <h2>
-      Payment Details
-      <button class="upload-btn">Upload File</button>
-    </h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Employee ID</th>
-          <th>Name</th>
-          <th>Salary Amount</th>
-          <th>Currency</th>
-          <th>Account Number</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td colspan="5" style="text-align:center; color:#888;">No records available</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+export default Customers;
 
-  <!-- Summary Section -->
-  <div class="section">
-    <h2>Summary</h2>
-    <div class="summary">
-      <span>Total Employees: ______</span>
-      <span>Total Debit Amount: ______</span>
+
+import React from "react";
+import { useParams, useNavigate } from "react-router-dom";
+
+const CustomerDetails = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  return (
+    <div>
+      <h2>Customer Details</h2>
+      <p>Showing details for customer ID: {id}</p>
+      <button onClick={() => navigate("/customers")}>Back to Customers</button>
     </div>
+  );
+};
 
-    <div class="btn-container">
-      <button class="btn">Submit for Approval</button>
-      <button class="btn">Save Draft</button>
-      <button class="btn">Clear Form</button>
-      <button class="btn">Cancel</button>
-    </div>
-  </div>
+export default CustomerDetails;
 
-</body>
-</html>
 
-css2:
 
-body {
-  font-family: Arial, sans-serif;
-  background-color: #E5E5E5;
-  margin: 0;
-  padding: 0;
-}
-
-/* Top Navigation Bar */
-.navbar {
-  background-color: #1E5CF3;
-  color: white;
-  padding: 15px 30px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.navbar h1 {
-  font-size: 20px;
-  margin: 0 auto;
-}
-
-/* Section Containers */
-.section {
-  background-color: white;
-  margin: 20px auto;
-  width: 90%;
-  border-radius: 6px;
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.section h2 {
-  font-size: 16px;
-  margin-bottom: 15px;
-  color: #333;
-}
-
-/* Form Layout */
-.form-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 15px;
-  flex-wrap: wrap;
-}
-
-.form-group {
-  flex: 1;
-  min-width: 220px;
-  margin-right: 15px;
-}
-
-label {
-  display: block;
-  font-weight: bold;
-  margin-bottom: 5px;
-  font-size: 14px;
-}
-
-input, select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-/* Payment Table */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-
-th, td {
-  border: 1px solid #ccc;
-  text-align: left;
-  padding: 10px;
-}
-
-th {
-  background-color: #f0f0f0;
-  font-weight: bold;
-}
-
-/* Buttons */
-.btn-container {
-  text-align: right;
-  margin-top: 20px;
-}
-
-.btn {
-  background-color: #1E5CF3;
-  color: white;
-  border: none;
-  padding: 8px 15px;
-  margin-left: 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.btn:hover {
-  opacity: 0.9;
-}
-
-/* Upload & Type Button */
-.upload-btn {
-  background-color: #1E5CF3;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 4px;
-  border: none;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-.upload-btn:hover {
-  opacity: 0.9;
-}
-
-/* Summary Row */
-.summary {
-  margin-top: 20px;
-  font-weight: bold;
-  display: flex;
-  justify-content: space-between;
-}
