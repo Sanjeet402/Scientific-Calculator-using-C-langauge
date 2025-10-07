@@ -1,181 +1,159 @@
-#include<stdio.h>
-#include<conio.h>
-#include<math.h>
+import React, { useState, useContext } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { CustomerContext } from "../context/CustomerContext";
 
-int main(void) {
-int choice, i, a, b;
-float x, y, result;
-clrscr();
-do {
-printf(“\nSelect your operation (0 to exit):\n”);
-printf(“1. Addition\n2. Subtraction\n3. Multiplication\n4. Division\n”);
-printf(“5. Square root\n6. X ^ Y\n7. X ^ 2\n8. X ^ 3\n”);
-printf(“9. 1 / X\n10. X ^ (1 / Y)\n11. X ^ (1 / 3)\n”);
-printf(“12. 10 ^ X\n13. X!\n14. %\n15. log10(x)\n16. Modulus\n”);
-printf(“17. Sin(X)\n18. Cos(X)\n19. Tan(X)\n20. Cosec(X)\n”);
-printf(“21. Cot(X)\n22. Sec(X)\n”);
-printf(“Choice: “);
-scanf(“%d”, &choice);
-if(choice == 0) exit(0);
-switch(choice) {
-case 1:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-printf(“\nEnter Y: “);
-scanf(“%f”, &y);
-result = x + y;
-printf(“\nResult: %f”, result);
-break;
-case 2:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-printf(“\nEnter Y: “);
-scanf(“%f”, &y);
-result = x – y;
-printf(“\nResult: %f”, result);
-break;
-case 3:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-printf(“\nEnter Y: “);
-scanf(“%f”, &y);
-result = x * y;
-printf(“\nResult: %f”, result);
-break;
-case 4:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-printf(“\nEnter Y: “);
-scanf(“%f”, &y);
-result = x / y;
-printf(“\nResult: %f”, result);
-break;
-case 5:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = sqrt(x);
-printf(“\nResult: %f”, result);
-break;
-case 6:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-printf(“\nEnter Y: “);
-scanf(“%f”, &y);
-result = pow(x, y);
-printf(“\nResult: %f”, result);
-break;
-case 7:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = pow(x, 2);
-printf(“\nResult: %f”, result);
-break;
-case 8:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = pow(x, 3);
-printf(“\nResult: %f”, result);
-break;
-case 9:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = pow(x, -1);
-printf(“\nResult: %f”, result);
-break;
-case 10:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-printf(“\nEnter Y: “);
-scanf(“%f”, &y);
-result = pow(x, (1/y));
-printf(“\nResult: %f”, result);
-break;
-case 11:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-y = 3;
-result = pow(x, (1/y));
-printf(“\nResult: %f”, result);
-break;
-case 12:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = pow(10, x);
-printf(“\nResult: %f”, result);
-break;
-case 13:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = 1;
-for(i = 1; i <= x; i++) {
-result = result * i;
-}
-printf(“\nResult: %.f”, result);
-break;
-case 14:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-printf(“\nEnter Y: “);
-scanf(“%f”, &y);
-result = (x * y) / 100;
-printf(“\nResult: %.2f”, result);
-break;
-case 15:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = log10(x);
-printf(“\nResult: %.2f”, result);
-break;
-case 16:
-printf(“Enter X: “);
-scanf(“%d”, &a);
-printf(“\nEnter Y: “);
-scanf(“%d”, &b);
-result = a % b;
-printf(“\nResult: %d”, result);
-break;
-case 17:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = sin(x * 3.14159 / 180);
-printf(“\nResult: %.2f”, result);
-break;
-case 18:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = cos(x * 3.14159 / 180);
-printf(“\nResult: %.2f”, result);
-break;
-case 19:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = tan(x * 3.14159 / 180);
-printf(“\nResult: %.2f”, result);
-break;
-case 20:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = 1 / (sin(x * 3.14159 / 180));
-printf(“\nResult: %.2f”, result);
-break;
-case 21:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = 1 / tan(x * 3.14159 / 180);
-printf(“\nResult: %.2f”, result);
-break;
-case 22:
-printf(“Enter X: “);
-scanf(“%f”, &x);
-result = 1 / cos(x * 3.14159 / 180);
-printf(“\nResult: %.2f”, result);
-break;
-default:
-printf(“\nInvalid Choice!”);
-}
-} while(choice);
-getch();
-return 0;
-}
+const AddCustomer = () => {
+  const { customers, setCustomers } = useContext(CustomerContext);
+  const navigate = useNavigate();
+
+  // State for the new customer form
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "" });
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Logic to add a new customer
+    const nextId = customers.length > 0 ? Math.max(...customers.map((c) => c.id)) + 1 : 1;
+    const newCustomer = {
+      ...form,
+      id: nextId,
+      accounts: [], // New customers start with no accounts
+    };
+    setCustomers([...customers, newCustomer]);
+
+    // Go back to the customer list page after adding
+    navigate("/customers");
+  };
+
+  return (
+    <div>
+      <Link to="/customers">← Back to Customers List</Link>
+      <h2>Add New Customer</h2>
+      <form onSubmit={handleSubmit}>
+        <input name="firstName" value={form.firstName} onChange={handleChange} placeholder="First Name" required />{" "}
+        <input name="lastName" value={form.lastName} onChange={handleChange} placeholder="Last Name" required />{" "}
+        <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email" required />{" "}
+        <button type="submit">Create Customer</button>
+      </form>
+    </div>
+  );
+};
+
+export default AddCustomer;
 
 
+
+import React, { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { CustomerContext } from "../context/CustomerContext";
+
+const Customers = () => {
+  const { customers, setCustomers } = useContext(CustomerContext);
+  const [form, setForm] = useState({ id: "", firstName: "", lastName: "", email: "", phone: "" });
+  const [isEdit, setIsEdit] = useState(false);
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleEdit = (customer) => {
+    setForm(customer);
+    setIsEdit(true);
+  };
+
+  const handleDelete = (id) => {
+    if (window.confirm("Are you sure you want to delete this customer?")) {
+      setCustomers(customers.filter((c) => c.id !== id));
+    }
+  };
+
+  // This submit function now ONLY handles editing/updating
+  const handleUpdateSubmit = (e) => {
+    e.preventDefault();
+    setCustomers(customers.map((c) => (c.id === form.id ? form : c)));
+    setIsEdit(false);
+    setForm({ id: "", firstName: "", lastName: "", email: "", phone: "" });
+  };
+
+  return (
+    <div>
+      <h2>Customers List</h2>
+      {/* This button navigates to your new page */}
+      <button onClick={() => navigate("/add-customer")} style={{ marginBottom: "15px" }}>
+        Add New Customer
+      </button>
+
+      <table border="1" cellPadding="8" width="100%">
+        <thead>
+          <tr>
+            <th>Id</th><th>First Name</th><th>Last Name</th><th>Email</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {customers.map((c) => (
+            <tr key={c.id}>
+              <td>{c.id}</td>
+              <td>{c.firstName}</td>
+              <td>{c.lastName}</td>
+              <td>{c.email}</td>
+              <td>
+                <button onClick={() => navigate(`/customers/${c.id}`)}>Show</button>{" "}
+                <button onClick={() => handleEdit(c)}>Edit</button>{" "}
+                <button onClick={() => handleDelete(c.id)}>Delete</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* This form is now ONLY for editing */}
+      {isEdit && (
+        <div style={{ marginTop: '20px' }}>
+          <h3>Edit Customer</h3>
+          <form onSubmit={handleUpdateSubmit}>
+            <input name="firstName" value={form.firstName} onChange={handleChange} placeholder="First Name" required />{" "}
+            <input name="lastName" value={form.lastName} onChange={handleChange} placeholder="Last Name" required />{" "}
+            <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email" required />{" "}
+            <button type="submit">Update</button>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Customers;
+
+
+
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { CustomerProvider } from "./context/CustomerContext"; // Adjust path if needed
+import Customers from "./components/Customers"; // Adjust path if needed
+import AddCustomer from "./components/AddCustomer"; // Import the new component
+import CustomerDetails from "./components/CustomerDetails"; // Adjust path if needed
+
+function App() {
+  return (
+    <CustomerProvider>
+      <Router>
+        <div className="App">
+          {/* Your Navbar can go here */}
+          <Routes>
+            <Route path="/customers" element={<Customers />} />
+            {/* Add the route for the new page */}
+            <Route path="/add-customer" element={<AddCustomer />} />
+            <Route path="/customers/:id" element={<CustomerDetails />} />
+            <Route path="/" element={<Customers />} /> 
+          </Routes>
+        </div>
+      </Router>
+    </CustomerProvider>
+  );
+}
+
+export default App;
