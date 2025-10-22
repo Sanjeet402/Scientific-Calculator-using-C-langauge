@@ -1,610 +1,294 @@
-BatchStatus.java
+Controller
+package com.payrollbackend.controller;
 
-package com.yourcompany.payroll.enums;
+import com.payrollbackend.model.PayrollBatch;
+import com.payrollbackend.model.PayrollBatchPayment;
+import com.payrollbackend.service.PayrollBatchService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
-public enum BatchStatus {
-    DRAFT,
-    PENDING_AUTHORIZATION,
-    BATCH_FULLY_AUTHORIZED,
-    RETURNED_FOR_AUTHORIZATION,
-    REJECTED,
-    PROCESSED
-}
-
-EmployeePaymentDto.java
-
-package com.yourcompany.payroll.dto;
-
-import java.math.BigDecimal;
-
-// DTO for a single employee entry in the manual form
-public class EmployeePaymentDto {
-    private String employeeId;
-    private String employeeName;
-    private BigDecimal salaryAmount;
-    private String currency; // Should match the batch currency
-    private String accountNumber;
-    
-    // Getters and Setters
-}
-
-PayrollRequestDto.java
-package com.yourcompany.payroll.dto;
-
-import com.yourcompany.payroll.enums.PayrollType;
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
-// DTO for creating a new manual payroll batch
-public class PayrollRequestDto {
-    private String debitAccount;
-    private LocalDate paymentDate;
-    private PayrollType payrollType;
-    private String paymentCurrency;
-    private List<EmployeePaymentDto> employees;
-    
-    // Getters and Setters
+@RestController
+@RequestMapping("/api/batch")
+public class PayrollBatchController {
+
+    private final PayrollBatchService batchService;
+
+    @Autowired
+    public PayrollBatchController(PayrollBatchService batchService) {
+        this.batchService = batchService;
+    }
+
+    // CREATE a batch (with all payments)
+    @PostMapping
+    public PayrollBatch createBatch(@RequestBody PayrollBatch batch) {
+        return batchService.saveBatch(batch);
+    }
+
+    // GET all batches
+    @GetMapping
+    public List<PayrollBatch> getAllBatches() {
+        return batchService.getAllBatches();
+    }
+
+    // GET batch by batch reference (ID in table)
+    @GetMapping("/{reference}")
+    public PayrollBatch getBatchByReference(@PathVariable String reference) {
+        Optional<PayrollBatch> batchOpt = batchService.getBatchByReference(reference);
+        return batchOpt.orElse(null);
+    }
+
+    // GET all payments for batch
+    @GetMapping("/{reference}/payments")
+    public List<PayrollBatchPayment> getPaymentsByBatch(@PathVariable String reference) {
+        Optional<PayrollBatch> batchOpt = batchService.getBatchByReference(reference);
+        if (batchOpt.isPresent()) {
+            return batchOpt.get().getPayments();
+        }
+        return null;
+    }
 }
 
-ApprovalRequestDto.java
+PayrollBatch
+package com.payrollbackend.model;
 
-package com.yourcompany.payroll.dto;
-
-// DTO for submitting the approval form
-public class ApprovalRequestDto {
-    // From screen 1000091728.jpg
-    private String challengeCode;
-    private String securityCode; // Or password
-    
-    // Getters and Setters
-}
-
-ReturnRequestDto.java
-
-package com.yourcompany.payroll.dto;
-
-// DTO for returning a batch for authorization
-public class ReturnRequestDto {
-    private String reason;
-    
-    // Getters and Setters
-}
-
-PayrollBatch.java
-package com.yourcompany.payroll.entity;
-
-import com.yourcompany.payroll.enums.BatchStatus;
-import com.yourcompany.payroll.enums.PayrollType;
-import javax.persistence.*;
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "payroll_batches")
+@Table(name = "payroll_batch")
 public class PayrollBatch {
-
-    @Id
-    @Column(name = "batch_reference_no")
-    private String batchReferenceNo;
-
-    @ManyToOne
-    @JoinColumn(name = "created_by_user_id", referencedColumnName = "user_id")
-    private User createdBy;
-
-    @ManyToOne
-    @JoinColumn(name = "approved_by_user_id", referencedColumnName = "user_id")
-    private User approvedBy;
-    
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "number_of_payments")
-    private Integer numberOfPayments;
-
-    @Column(name = "total_debit_amount")
-    private BigDecimal totalDebitAmount;
-    
-    @Column(name = "max_debit_amount")
-    private BigDecimal maxDebitAmount; // As seen in your "Manage Payroll" screen
-
-    @Column(name = "currency")
-    private String currency;
-
-    @ManyToOne
-    @JoinColumn(name = "debit_account_number")
-    private Account debitAccount;
-
-    @Column(name = "payment_date")
-    private LocalDate paymentDate;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "payroll_type")
-    private PayrollType payrollType;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    private BatchStatus status;
-
-    @Column(name = "rejection_reason")
-    private String rejectionReason;
-
-    @OneToMany(mappedBy = "payrollBatch", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<EmployeePayment> payments;
-
-    // Getters and Setters
-}
-EmployeePayment.java
-package com.yourcompany.payroll.entity;
-
-import javax.persistence.*;
-import java.math.BigDecimal;
-
-@Entity
-@Table(name = "employee_payments")
-public class EmployeePayment {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "batch_reference_no")
-    private PayrollBatch payrollBatch;
+    @Column(name = "batch_reference", unique = true, nullable = false)
+    private String batchReference;
 
-    @Column(name = "employee_id")
+    @Column(name = "created_by", nullable = false)
+    private String createdBy;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "debit_account", nullable = false)
+    private String debitAccount;
+
+    @Column(name = "max_debit_amount", nullable = false)
+    private Double maxDebitAmount;
+
+    @Column(name = "total_debit_amount", nullable = false)
+    private Double totalDebitAmount;
+
+    @Column(name = "status", nullable = false)
+    private String status;
+
+    @OneToMany(mappedBy = "batch", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<PayrollBatchPayment> payments;
+
+    public PayrollBatch() {}
+
+    // Getters and setters as before
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getBatchReference() { return batchReference; }
+    public void setBatchReference(String batchReference) { this.batchReference = batchReference; }
+
+    public String getCreatedBy() { return createdBy; }
+    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public String getDebitAccount() { return debitAccount; }
+    public void setDebitAccount(String debitAccount) { this.debitAccount = debitAccount; }
+
+    public Double getMaxDebitAmount() { return maxDebitAmount; }
+    public void setMaxDebitAmount(Double maxDebitAmount) { this.maxDebitAmount = maxDebitAmount; }
+
+    public Double getTotalDebitAmount() { return totalDebitAmount; }
+    public void setTotalDebitAmount(Double totalDebitAmount) { this.totalDebitAmount = totalDebitAmount; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public List<PayrollBatchPayment> getPayments() { return payments; }
+    public void setPayments(List<PayrollBatchPayment> payments) { this.payments = payments; }
+}
+
+PayrollBatchPayment
+package com.payrollbackend.model;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "payroll_batch_payment")
+public class PayrollBatchPayment {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "batch_id", nullable = false)
+    @JsonBackReference
+    private PayrollBatch batch;
+
+    @Column(name = "employee_id", nullable = false)
     private String employeeId;
 
-    @Column(name = "employee_name")
+    @Column(name = "employee_name", nullable = false)
     private String employeeName;
 
-    @Column(name = "salary_amount")
-    private BigDecimal salaryAmount;
+    @Column(name = "salary_amount", nullable = false)
+    private Double salaryAmount;
 
-    @Column(name = "currency")
+    @Column(name = "currency", nullable = false)
     private String currency;
 
-    @Column(name = "account_number")
-    private String accountNumber;
-    
-    // Getters and Setters
+    @Column(name = "employee_account_no", nullable = false)
+    private String employeeAccountNo;
+
+    @Column(name = "status", nullable = false)
+    private String status;
+
+    public PayrollBatchPayment() {}
+
+    // Getters and setters
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public PayrollBatch getBatch() { return batch; }
+    public void setBatch(PayrollBatch batch) { this.batch = batch; }
+
+    public String getEmployeeId() { return employeeId; }
+    public void setEmployeeId(String employeeId) { this.employeeId = employeeId; }
+
+    public String getEmployeeName() { return employeeName; }
+    public void setEmployeeName(String employeeName) { this.employeeName = employeeName; }
+
+    public Double getSalaryAmount() { return salaryAmount; }
+    public void setSalaryAmount(Double salaryAmount) { this.salaryAmount = salaryAmount; }
+
+    public String getCurrency() { return currency; }
+    public void setCurrency(String currency) { this.currency = currency; }
+
+    public String getEmployeeAccountNo() { return employeeAccountNo; }
+    public void setEmployeeAccountNo(String employeeAccountNo) { this.employeeAccountNo = employeeAccountNo; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }
 
-PayrollBatchRepository.java
+PayrollBatchPaymentRepository
+package com.payrollbackend.repository;
 
-package com.yourcompany.payroll.repository;
-
-import com.yourcompany.payroll.entity.PayrollBatch;
-import com.yourcompany.payroll.enums.BatchStatus;
+import com.payrollbackend.model.PayrollBatchPayment;
 import org.springframework.data.jpa.repository.JpaRepository;
+
 import java.util.List;
 
-public interface PayrollBatchRepository extends JpaRepository<PayrollBatch, String> {
+public interface PayrollBatchPaymentRepository extends JpaRepository<PayrollBatchPayment, Long> {
+    List<PayrollBatchPayment> findByBatch_BatchReference(String batchReference);
 
-    // For the "Approve Payroll" screen
-    List<PayrollBatch> findByStatus(BatchStatus status);
-    
-    // For the "Manage Payroll" screen (to show user's own batches)
-    List<PayrollBatch> findByCreatedBy(User user);
 }
+PayrollBatchRepository
+package com.payrollbackend.repository;
 
-UserRepository.java
-package com.yourcompany.payroll.repository;
-
-import com.yourcompany.payroll.entity.User;
+import com.payrollbackend.model.PayrollBatch;
 import org.springframework.data.jpa.repository.JpaRepository;
-import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User, Long> {
-    // Used by security/service to find the logged-in user
-    Optional<User> findByUserId(String userId);
+public interface PayrollBatchRepository extends JpaRepository<PayrollBatch, Long> {
+    PayrollBatch findByBatchReference(String batchReference);
 }
+PayrollBatchService
+package com.payrollbackend.service;
 
-ResourceNotFoundException.java
-package com.yourcompany.payroll.exception;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
-@ResponseStatus(HttpStatus.NOT_FOUND)
-public class ResourceNotFoundException extends RuntimeException {
-    public ResourceNotFoundException(String message) {
-        super(message);
-    }
-}
-
-InvalidOperationException.java
-
-package com.yourcompany.payroll.exception;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
-@ResponseStatus(HttpStatus.BAD_REQUEST)
-public class InvalidOperationException extends RuntimeException {
-    public InvalidOperationException(String message) {
-        super(message);
-    }
-}
-
-PayrollService.java
-
-package com.yourcompany.payroll.service;
-
-import com.yourcompany.payroll.dto.*;
-import com.yourcompany.payroll.entity.*;
-import com.yourcompany.payroll.enums.BatchStatus;
-import com.yourcompany.payroll.exception.*;
-import com.yourcompany.payroll.repository.*;
+import com.payrollbackend.model.PayrollBatch;
+import com.payrollbackend.model.PayrollBatchPayment;
+import com.payrollbackend.repository.PayrollBatchRepository;
+import com.payrollbackend.repository.PayrollBatchPaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
-public class PayrollService {
+public class PayrollBatchService {
+
+    private final PayrollBatchRepository batchRepo;
+    private final PayrollBatchPaymentRepository paymentRepo;
 
     @Autowired
-    private PayrollBatchRepository payrollBatchRepository;
-    
-    @Autowired
-    private EmployeePaymentRepository employeePaymentRepository;
+    public PayrollBatchService(PayrollBatchRepository batchRepo, PayrollBatchPaymentRepository paymentRepo) {
+        this.batchRepo = batchRepo;
+        this.paymentRepo = paymentRepo;
+    }
 
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    private AccountRepository accountRepository;
-
-    // --- 1. MANUAL PAYMENT INITIATION ---
-
-    @Transactional
-    public PayrollBatch initiateManualPayroll(PayrollRequestDto request, String makerUserId) {
-        User maker = userRepository.findByUserId(makerUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + makerUserId));
-        
-        Account debitAccount = accountRepository.findById(request.getDebitAccount())
-                .orElseThrow(() -> new ResourceNotFoundException("Debit account not found: " + request.getDebitAccount()));
-
-        PayrollBatch batch = new PayrollBatch();
-        batch.setBatchReferenceNo(generateBatchRef()); // e.g., "CD000007"
-        batch.setCreatedBy(maker);
+    // Save a batch (with payments)
+    public PayrollBatch saveBatch(PayrollBatch batch) {
         batch.setCreatedAt(LocalDateTime.now());
-        batch.setDebitAccount(debitAccount);
-        batch.setPaymentDate(request.getPaymentDate());
-        batch.setPayrollType(request.getPayrollType());
-        batch.setCurrency(request.getPaymentCurrency());
-        
-        // As per the button "Submit for Approval"
-        batch.setStatus(BatchStatus.PENDING_AUTHORIZATION);
-
-        // Process employee payments
-        BigDecimal totalAmount = BigDecimal.ZERO;
-        BigDecimal maxDebit = BigDecimal.ZERO;
-        
-        List<EmployeePayment> payments = request.getEmployees().stream().map(dto -> {
-            EmployeePayment payment = new EmployeePayment();
-            payment.setEmployeeId(dto.getEmployeeId());
-            payment.setEmployeeName(dto.getEmployeeName());
-            payment.setSalaryAmount(dto.getSalaryAmount());
-            payment.setAccountNumber(dto.getAccountNumber());
-            payment.setCurrency(dto.getCurrency());
-            payment.setPayrollBatch(batch); // Link back to the batch
-            return payment;
-        }).collect(Collectors.toList());
-        
-        for (EmployeePayment p : payments) {
-             totalAmount = totalAmount.add(p.getSalaryAmount());
-             if (p.getSalaryAmount().compareTo(maxDebit) > 0) {
-                 maxDebit = p.getSalaryAmount();
-             }
+        // Make sure all payments reference this batch
+        if (batch.getPayments() != null) {
+            for (PayrollBatchPayment payment : batch.getPayments()) {
+                payment.setBatch(batch);
+            }
         }
-        
-        batch.setPayments(payments);
-        batch.setNumberOfPayments(payments.size());
-        batch.setTotalDebitAmount(totalAmount);
-        batch.setMaxDebitAmount(maxDebit); // Set max debit
-
-        return payrollBatchRepository.save(batch);
-    }
-    
-    private String generateBatchRef() {
-        // In a real app, this would be a sequence generator
-        // This is a simple placeholder
-        long count = payrollBatchRepository.count();
-        return "CD" + String.format("%06d", count + 1);
+        return batchRepo.save(batch);
     }
 
-    // --- 2. PAYMENT APPROVAL ---
-
-    /**
-     * Gets all batches waiting for approval (for the "Approve Payroll" screen)
-     */
-    public List<PayrollBatch> getApprovalQueue() {
-        return payrollBatchRepository.findByStatus(BatchStatus.PENDING_AUTHORIZATION);
+    // Get all batches
+    public List<PayrollBatch> getAllBatches() {
+        return batchRepo.findAll();
     }
 
-    /**
-     * Gets details for a single batch (for the summary screen)
-     */
-    public PayrollBatch getBatchDetails(String batchReferenceNo) {
-        return payrollBatchRepository.findById(batchReferenceNo)
-                .orElseThrow(() -> new ResourceNotFoundException("Batch not found: " + batchReferenceNo));
+    // Find by batch reference (unique)
+    public Optional<PayrollBatch> getBatchByReference(String reference) {
+        return batchRepo.findAll().stream()
+                .filter(batch -> batch.getBatchReference().equals(reference))
+                .findFirst();
     }
 
-    /**
-     * Approves a payroll batch
-     */
-    @Transactional
-    public PayrollBatch approveBatch(String batchReferenceNo, ApprovalRequestDto approvalDto, String approverUserId) {
-        User approver = userRepository.findByUserId(approverUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("Approver not found: " + approverUserId));
-        
-        PayrollBatch batch = getBatchDetails(batchReferenceNo);
-
-        // Check 1: Is it in the correct status?
-        if (batch.getStatus() != BatchStatus.PENDING_AUTHORIZATION) {
-            throw new InvalidOperationException("Batch is not pending authorization.");
-        }
-
-        // Check 2: Segregation of Duties (Maker cannot be Approver)
-        if (batch.getCreatedBy().getUserId().equals(approver.getUserId())) {
-            throw new InvalidOperationException("Maker cannot approve their own batch.");
-        }
-        
-        // Check 3: Validate 2FA/Password (from 1000091728.jpg)
-        // This is a placeholder for your actual security logic
-        if (!isValidApprovalCode(approver, approvalDto)) {
-             throw new InvalidOperationException("Invalid security code or password.");
-        }
-        
-        // Check 4: Check account balance (optional but recommended)
-        Account debitAccount = batch.getDebitAccount();
-        if (debitAccount.getBalance().compareTo(batch.getTotalDebitAmount()) < 0) {
-            throw new InvalidOperationException("Insufficient funds in debit account.");
-        }
-
-        // --- All Checks Passed ---
-        
-        // 1. Debit the main account
-        debitAccount.setBalance(debitAccount.getBalance().subtract(batch.getTotalDebitAmount()));
-        accountRepository.save(debitAccount);
-        
-        // 2. Update batch status
-        batch.setStatus(BatchStatus.BATCH_FULLY_AUTHORIZED);
-        batch.setApprovedBy(approver);
-        
-        // 3. In a real system: Send payments to a core banking API or queue
-        
-        return payrollBatchRepository.save(batch);
-    }
-
-    /**
-     * Returns a batch for correction
-     */
-    @Transactional
-    public PayrollBatch returnBatch(String batchReferenceNo, ReturnRequestDto returnDto, String returnerUserId) {
-        // (Similar checks as approveBatch: find user, find batch, check status)
-        
-        PayrollBatch batch = getBatchDetails(batchReferenceNo);
-        if (batch.getStatus() != BatchStatus.PENDING_AUTHORIZATION) {
-            throw new InvalidOperationException("Batch is not pending authorization.");
-        }
-        
-        batch.setStatus(BatchStatus.RETURNED_FOR_AUTHORIZATION);
-        batch.setRejectionReason(returnDto.getReason());
-        
-        return payrollBatchRepository.save(batch);
-    }
-    
-    private boolean isValidApprovalCode(User approver, ApprovalRequestDto dto) {
-        // Placeholder: Implement your logic to validate the challenge code and password/security code.
-        // E.g., check against the user's password and a one-time-password (OTP) service.
-        return true; 
+    // Get all payments by batch reference
+    public List<PayrollBatchPayment> getPaymentsByBatch(PayrollBatch batch) {
+        return batch.getPayments();
     }
 }
 
 
-PayrollController.java
-
-package com.yourcompany.payroll.controller;
-
-import com.yourcompany.payroll.dto.*;
-import com.yourcompany.payroll.entity.PayrollBatch;
-import com.yourcompany.payroll.service.PayrollService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import java.security.Principal;
-import java.util.List;
-
-@RestController
-@RequestMapping("/api/payroll")
-public class PayrollController {
-
-    @Autowired
-    private PayrollService payrollService;
-
-    // --- 1. MANUAL PAYMENT INITIATION (Maker) ---
-    
-    @PostMapping("/initiate/manual")
-    @PreAuthorize("hasRole('ROLE_MAKER')") // Requires 'MAKER' role
-    public ResponseEntity<PayrollBatch> initiateManualPayroll(@RequestBody PayrollRequestDto request, Principal principal) {
-        // principal.getName() gives the 'userId' of the logged-in user
-        PayrollBatch createdBatch = payrollService.initiateManualPayroll(request, principal.getName());
-        return ResponseEntity.ok(createdBatch);
+{
+  "batchReference": "BATCH001",
+  "createdBy": "admin",
+  "debitAccount": "12345678",
+  "maxDebitAmount": 100000,
+  "totalDebitAmount": 50000,
+  "status": "PENDING",
+  "payments": [
+    {
+      "employeeId": "EMP001",
+      "employeeName": "John Doe",
+      "salaryAmount": 25000,
+      "currency": "INR",
+      "employeeAccountNo": "9999912345",
+      "status": "PENDING"
+    },
+    {
+      "employeeId": "EMP002",
+      "employeeName": "Jane Smith",
+      "salaryAmount": 25000,
+      "currency": "INR",
+      "employeeAccountNo": "9999945678",
+      "status": "PENDING"
     }
-
-    // --- 2. PAYMENT APPROVAL (Checker/Approver) ---
-
-    @GetMapping("/approve")
-    @PreAuthorize("hasRole('ROLE_APPROVER')") // Requires 'APPROVER' role
-    public ResponseEntity<List<PayrollBatch>> getApprovalQueue() {
-        List<PayrollBatch> queue = payrollService.getApprovalQueue();
-        return ResponseEntity.ok(queue);
-    }
-    
-    @GetMapping("/{batchRef}/details")
-    @PreAuthorize("hasAnyRole('ROLE_MAKER', 'ROLE_APPROVER')") // Both can view
-    public ResponseEntity<PayrollBatch> getBatchDetails(@PathVariable("batchRef") String batchReferenceNo) {
-        PayrollBatch batch = payrollService.getBatchDetails(batchReferenceNo);
-        return ResponseEntity.ok(batch);
-    }
-
-    @PostMapping("/{batchRef}/approve")
-    @PreAuthorize("hasRole('ROLE_APPROVER')")
-    public ResponseEntity<PayrollBatch> approveBatch(@PathVariable("batchRef") String batchReferenceNo, 
-                                                   @RequestBody ApprovalRequestDto approvalDto, 
-                                                   Principal principal) {
-        PayrollBatch approvedBatch = payrollService.approveBatch(batchReferenceNo, approvalDto, principal.getName());
-        return ResponseEntity.ok(approvedBatch);
-    }
-    
-    @PostMapping("/{batchRef}/return")
-    @PreAuthorize("hasRole('ROLE_APPROVER')")
-    public ResponseEntity<PayrollBatch> returnBatch(@PathVariable("batchRef") String batchReferenceNo, 
-                                                  @RequestBody ReturnRequestDto returnDto, 
-                                                  Principal principal) {
-        PayrollBatch returnedBatch = payrollService.returnBatch(batchReferenceNo, returnDto, principal.getName());
-        return ResponseEntity.ok(returnedBatch);
-    }
+  ]
 }
-
-SecurityConfig.java
-package com.yourcompany.payroll.config;
-
-import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-
-@Configuration
-@EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true) // This enables @PreAuthorize
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-            .csrf().disable() // Disable CSRF for simple APIs
-            .authorizeRequests()
-            .antMatchers("/api/auth/**").permitAll() // Login endpoint
-            
-            // You can also configure rules here, but @PreAuthorize is more granular
-            .antMatchers(HttpMethod.POST, "/api/payroll/initiate/**").hasRole("MAKER")
-            .antMatchers("/api/payroll/approve").hasRole("APPROVER")
-            .antMatchers(HttpMethod.POST, "/api/payroll/{batchRef}/approve").hasRole("APPROVER")
-            .antMatchers(HttpMethod.POST, "/api/payroll/{batchRef}/return").hasRole("APPROVER")
-            
-            .anyRequest().authenticated() // All other endpoints require login
-            .and()
-            .httpBasic(); // Or formLogin(), or JWT token filter
-    }
-    
-    // You also need to configure a PasswordEncoder bean and a UserDetailsService
-    // to load users from your `UserRepository` for this to work.
-}
-
-TestPayrollController.java
-
-package com.yourcompany.payroll.controller;
-
-import com.yourcompany.payroll.dto.*;
-import com.yourcompany.payroll.entity.PayrollBatch;
-import com.yourcompany.payroll.service.PayrollService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
-/**
- * A simple, unsecured controller for testing service-layer logic.
- * Make sure to have test data in your database (e.g., users, accounts).
- */
-@RestController
-@RequestMapping("/api/test/payroll")
-public class TestPayrollController {
-
-    @Autowired
-    private PayrollService payrollService;
-
-    // --- Test Data (Assumed to exist in your database) ---
-    private static final String TEST_MAKER_ID = "TESTUSER01";
-    private static final String TEST_APPROVER_ID = "TESTUSER02";
-
-    /**
-     * Tests the manual payroll initiation.
-     */
-    @PostMapping("/initiate")
-    public ResponseEntity<PayrollBatch> testInitiate(@RequestBody PayrollRequestDto request) {
-        // We pass the hardcoded maker ID
-        PayrollBatch createdBatch = payrollService.initiateManualPayroll(request, TEST_MAKER_ID);
-        return ResponseEntity.ok(createdBatch);
-    }
-
-    /**
-     * Tests fetching the approval queue.
-     */
-    @GetMapping("/queue")
-    public ResponseEntity<List<PayrollBatch>> testGetQueue() {
-        List<PayrollBatch> queue = payrollService.getApprovalQueue();
-        return ResponseEntity.ok(queue);
-    }
-
-    /**
-     * Tests fetching a single batch's details.
-     */
-    @GetMapping("/{batchRef}")
-    public ResponseEntity<PayrollBatch> testGetDetails(@PathVariable("batchRef") String batchReferenceNo) {
-        PayrollBatch batch = payrollService.getBatchDetails(batchReferenceNo);
-        return ResponseEntity.ok(batch);
-    }
-
-    /**
-     * Tests approving a batch.
-     */
-    @PostMapping("/{batchRef}/approve")
-    public ResponseEntity<PayrollBatch> testApprove(@PathVariable("batchRef") String batchReferenceNo,
-                                                    @RequestBody ApprovalRequestDto approvalDto) {
-        // We pass the hardcoded approver ID
-        PayrollBatch approvedBatch = payrollService.approveBatch(batchReferenceNo, approvalDto, TEST_APPROVER_ID);
-        return ResponseEntity.ok(approvedBatch);
-    }
-
-    /**
-     * Tests returning a batch.
-     */
-    @PostMapping("/{batchRef}/return")
-    public ResponseEntity<PayrollBatch> testReturn(@PathVariable("batchRef") String batchReferenceNo,
-                                                   @RequestBody ReturnRequestDto returnDto) {
-        // We pass the hardcoded approver/returner ID
-        PayrollBatch returnedBatch = payrollService.returnBatch(batchReferenceNo, returnDto, TEST_APPROVER_ID);
-        return ResponseEntity.ok(returnedBatch);
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
