@@ -1,6 +1,5 @@
 Sidebar.js
 
-// Sidebar.js
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import icon from "./icon.png"; // Adjust path if needed
@@ -96,6 +95,7 @@ export default function HomePage({ children }) {
     </>
   );
 }
+
 
 
 
