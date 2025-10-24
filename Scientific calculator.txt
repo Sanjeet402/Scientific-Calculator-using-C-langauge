@@ -1,196 +1,33 @@
-Navbar.jsx
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import icon from "./icon.png";
+Sidebar.js
 
-const Navbar = ({ sidebarOpen, toggleSidebar }) => {
-  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-
-  const handleLogout = () => {
-    console.log("User logged out");
-    setProfileDropdownOpen(false);
-  };
-  return (
-    <>
-      <style>{`
-        .navbar-custom {
-          background: #7BB6F5;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-          height: 56px;
-        }
-        .navbar-brand-custom {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          font-weight: 600;
-          font-size: 1.3rem;
-        }
-        .hamburger-btn {
-          background: transparent;
-          border: none;
-          font-size: 1.5rem;
-          cursor: pointer;
-          padding: 8px 12px;
-          margin-right: 15px;
-        }
-        .profile-btn {
-          background: transparent;
-          border: none;
-          cursor: pointer;
-          padding: 8px;
-          border-radius: 50%;
-        }
-        .profile-dropdown {
-          position: absolute;
-          top: 50px;
-          right: 20px;
-          background: white;
-          border-radius: 8px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-          min-width: 180px;
-          z-index: 1050;
-        }
-        .profile-dropdown-item {
-          padding: 12px 20px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          width: 100%;
-          border: none;
-          background: transparent;
-        }
-      `}</style>
-
-      <nav className="navbar navbar-expand-lg navbar-light navbar-custom fixed-top">
-        <div className="container-fluid px-4">
-          <div className="d-flex align-items-center">
-            <button className="hamburger-btn" onClick={toggleSidebar}>
-              <i className={`bi ${sidebarOpen ? 'bi-x-lg' : 'bi-list'}`}></i>
-            </button>
-
-            <Link className="navbar-brand navbar-brand-custom" to="/">
-              <img src={icon} alt="Logo" width="45" height="45" style={{ borderRadius: "8px" }} />
-              <span>Standard Chartered</span>
-            </Link>
-          </div>
-
-          <div className="ms-auto position-relative">
-            <button 
-              className="profile-btn" 
-              onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-            >
-              <i className="bi bi-person-circle fs-4"></i>
-            </button>
-
-            {profileDropdownOpen && (
-              <div className="profile-dropdown">
-                <button className="profile-dropdown-item" onClick={handleLogout}>
-                  <i className="bi bi-box-arrow-right"></i> Logout
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </nav>
-    </>
-  );
-};
-
-export default Navbar;
-
-
-Sidebar.jsx
+// Sidebar.js
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import icon from "./icon.png"; // Adjust path if needed
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const [paymentsOpen, setPaymentsOpen] = useState(false);
   const [approvalsOpen, setApprovalsOpen] = useState(false);
   const location = useLocation();
 
+  const togglePayments = () => setPaymentsOpen(!paymentsOpen);
+  const toggleApprovals = () => setApprovalsOpen(!approvalsOpen);
   const isActive = (path) => location.pathname === path;
+  const handleLinkClick = () => toggleSidebar();
+  const handlePaymentLinkClick = () => {
+    setPaymentsOpen(false);
+    toggleSidebar();
+  };
+  const handleApprovalLinkClick = () => {
+    setApprovalsOpen(false);
+    toggleSidebar();
+  };
 
   return (
     <>
-      <style>{`
-        .sidebar-custom {
-          background: #7BB6F5;
-          position: fixed;
-          left: ${isOpen ? '0' : '-250px'};
-          top: 56px;
-          width: 250px;
-          height: calc(100vh - 56px);
-          transition: left 0.3s ease;
-        }
-        .nav-link {
-          padding: 12px 20px;
-          display: block;
-          color: #333;
-        }
-        .nav-link.active {
-          background: #e6f2ff;
-          border-left: 3px solid #0066cc;
-          font-weight: 600;
-        }
-        .submenu-item {
-          padding-left: 45px;
-          font-size: 0.9rem;
-        }
-      `}</style>
-
+      {/* Styles and sidebar code; move the <style> element outside for global CSS if desired */}
       <nav className="sidebar-custom">
-        <ul className="nav flex-column mt-3">
-          <li className="nav-item">
-            <Link className={`nav-link ${isActive("/") ? "active" : ""}`} to="/" onClick={toggleSidebar}>
-              <i className="bi bi-house-door me-2"></i> Home
-            </Link>
-          </li>
-
-          {/* Payments */}
-          <li className="nav-item">
-            <button className="nav-link d-flex justify-content-between align-items-center w-100" onClick={() => setPaymentsOpen(!paymentsOpen)}>
-              <span><i className="bi bi-credit-card me-2"></i> Payments</span>
-              <i className={`bi ${paymentsOpen ? "bi-chevron-up" : "bi-chevron-down"}`}></i>
-            </button>
-            {paymentsOpen && (
-              <ul className="nav flex-column">
-                <li>
-                  <Link className={`nav-link submenu-item ${isActive("/payments/manual") ? "active" : ""}`} to="/payments/manual" onClick={toggleSidebar}>
-                    Manual
-                  </Link>
-                </li>
-                <li>
-                  <Link className={`nav-link submenu-item ${isActive("/payments/file-upload") ? "active" : ""}`} to="/payments/file-upload" onClick={toggleSidebar}>
-                    File Upload
-                  </Link>
-                </li>
-              </ul>
-            )}
-          </li>
-
-          {/* Approvals */}
-          <li className="nav-item">
-            <button className="nav-link d-flex justify-content-between align-items-center w-100" onClick={() => setApprovalsOpen(!approvalsOpen)}>
-              <span><i className="bi bi-check-circle me-2"></i> Approvals</span>
-              <i className={`bi ${approvalsOpen ? "bi-chevron-up" : "bi-chevron-down"}`}></i>
-            </button>
-            {approvalsOpen && (
-              <ul className="nav flex-column">
-                <li>
-                  <Link className={`nav-link submenu-item ${isActive("/approvals/manage") ? "active" : ""}`} to="/approvals/manage" onClick={toggleSidebar}>
-                    Manage
-                  </Link>
-                </li>
-                <li>
-                  <Link className={`nav-link submenu-item ${isActive("/approvals/approve") ? "active" : ""}`} to="/approvals/approve" onClick={toggleSidebar}>
-                    Approve
-                  </Link>
-                </li>
-              </ul>
-            )}
-          </li>
-        </ul>
+        {/* ... Sidebar JSX as you wrote ... */}
       </nav>
     </>
   );
@@ -198,81 +35,67 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
 export default Sidebar;
 
+Navbar.js
 
-Dashboard.jsx
+// Navbar.js
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
-import Sidebar from "../components/Sidebar";
+import { Link } from "react-router-dom";
+import icon from "./icon.png"; // Adjust path
 
-function Dashboard() {
-  const navigate = useNavigate();
+const Navbar = ({
+  sidebarOpen,
+  setSidebarOpen,
+  profileDropdownOpen,
+  setProfileDropdownOpen,
+  handleLogout,
+}) => (
+  <>
+    {/* Styles for Navbar could be moved to a separate CSS */}
+    <nav className="navbar navbar-expand-lg navbar-light navbar-custom fixed-top">
+      {/* ... Navbar JSX as you wrote ... */}
+    </nav>
+  </>
+);
+
+export default Navbar;
+
+
+HomePage.js
+
+// HomePage.js
+import React, { useState } from "react";
+import Sidebar from "./Sidebar";
+import Navbar from "./Navbar";
+
+export default function HomePage({ children }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+
+  const handleLogout = () => {
+    setProfileDropdownOpen(false);
+    // Add your logout logic here
+  };
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <Sidebar />
-
-      {/* Main Content */}
-      <div className="flex flex-col flex-1">
-        {/* Navbar */}
-        <Navbar />
-
-        {/* Dashboard Header */}
-        <div className="p-6 flex justify-between items-center bg-white shadow-sm">
-          <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-          <button
-            onClick={() => navigate("/")}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-          >
-            Back to Home
-          </button>
-        </div>
-
-        {/* Dashboard Body */}
-        <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="p-4 bg-white rounded-xl shadow-md hover:shadow-lg transition">
-            <h2 className="text-lg font-semibold mb-2">Reports</h2>
-            <p className="text-gray-600 mb-4">View performance and analysis reports.</p>
-            <button
-              onClick={() => navigate("/reports")}
-              className="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
-            >
-              Go
-            </button>
+    <>
+      <Navbar
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        profileDropdownOpen={profileDropdownOpen}
+        setProfileDropdownOpen={setProfileDropdownOpen}
+        handleLogout={handleLogout}
+      />
+      <div style={{ display: 'flex', marginTop: '56px' }}>
+        <Sidebar isOpen={sidebarOpen} toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+        <main className="main-content-shifted" style={{ flex: 1, background: '#f8f9fa' }}>
+          <div className="px-4 px-md-5 py-4">
+            {children}
           </div>
-
-          <div className="p-4 bg-white rounded-xl shadow-md hover:shadow-lg transition">
-            <h2 className="text-lg font-semibold mb-2">Manual Entry</h2>
-            <p className="text-gray-600 mb-4">Enter payroll or data manually.</p>
-            <button
-              onClick={() => navigate("/manual")}
-              className="px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition"
-            >
-              Open
-            </button>
-          </div>
-
-          <div className="p-4 bg-white rounded-xl shadow-md hover:shadow-lg transition">
-            <h2 className="text-lg font-semibold mb-2">Analytics</h2>
-            <p className="text-gray-600 mb-4">Track key insights and stats.</p>
-            <button
-              onClick={() => navigate("/analytics")}
-              className="px-3 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition"
-            >
-              View
-            </button>
-          </div>
-        </div>
+        </main>
       </div>
-    </div>
+    </>
   );
 }
-
-export default Dashboard;
-
-
-
 
 
 
