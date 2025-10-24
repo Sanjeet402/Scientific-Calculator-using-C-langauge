@@ -10,7 +10,6 @@ const Navbar = ({ sidebarOpen, toggleSidebar }) => {
     console.log("User logged out");
     setProfileDropdownOpen(false);
   };
-
   return (
     <>
       <style>{`
@@ -271,6 +270,7 @@ function Dashboard() {
 }
 
 export default Dashboard;
+
 
 
 
