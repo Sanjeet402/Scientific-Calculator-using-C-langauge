@@ -1,0 +1,332 @@
+AccountController
+package com.payrollbackend.controller;
+
+import com.payrollbackend.model.Account;
+import com.payrollbackend.model.PayrollBatchPayment;
+import com.payrollbackend.service.AccountService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
+import java.util.List;
+
+@CrossOrigin(origins = "http://localhost:3000")
+@RestController
+@RequestMapping("/api/accounts")
+public class AccountController {
+
+    private final AccountService accountService;
+
+    @Autowired
+    public AccountController(AccountService accountService) {
+        this.accountService = accountService;
+    }
+
+    @GetMapping
+    public List<Account> list() {
+        return accountService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Account> get(@PathVariable Long id) {
+        return accountService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity<Account> create(@RequestBody Account account) {
+        Account created = accountService.create(account);
+        return ResponseEntity.created(URI.create("/api/accounts/" + created.getId())).body(created);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Account> update(@PathVariable Long id, @RequestBody Account account) {
+        return accountService.update(id, account)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        accountService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/transactions")
+    public List<PayrollBatchPayment> transactions(@PathVariable Long id) {
+        return accountService.getTransactionsForAccount(id);
+    }
+}
+
+AccountStatementController
+/*
+ * ============================================
+ * PAGE: ACCOUNTS / STATEMENT
+ * PACKAGE: com.payrollbackend.controller
+ * PURPOSE: API endpoints for account management and transaction history
+ * ============================================
+ */
+package com.payrollbackend.controller;
+
+import com.payrollbackend.dto.*;
+import com.payrollbackend.service.AccountStatementService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/account-statement")
+@CrossOrigin(origins = "http://localhost:3000")
+public class AccountStatementController {
+
+    @Autowired
+    private AccountStatementService accountStatementService;
+
+    // ✅ GET ALL ACCOUNTS (Top table)
+    @GetMapping
+    public ResponseEntity<List<AccountSummaryDTO>> getAllAccounts() {
+        List<AccountSummaryDTO> accounts = accountStatementService.getAllAccounts();
+        return ResponseEntity.ok(accounts);
+    }
+
+    // GET transactions by account
+    @GetMapping("/{accountNumber}/transactions")
+    public List<TransactionHistoryDTO> getTransactions(
+            @PathVariable String accountNumber,
+            @RequestParam(required = false) String fromDate,
+            @RequestParam(required = false) String toDate) {
+        return accountStatementService.getTransactionsByAccount(accountNumber, fromDate, toDate);
+    }
+
+    // GET complete account statement
+    @GetMapping("/{accountNumber}/statement")
+    public AccountStatementDTO getAccountStatement(
+            @PathVariable String accountNumber,
+            @RequestParam(required = false) String fromDate,
+            @RequestParam(required = false) String toDate) {
+        return accountStatementService.getAccountStatement(accountNumber, fromDate, toDate);
+    }
+}
+
+ApprovalsController
+/*
+ * ============================================
+ * PAGE: APPROVALS
+ * PACKAGE: com.payrollbackend.controller
+ * PURPOSE: Approval workflow REST endpoints
+ * ACCESS: Only users with ROLE_APPROVER can access
+ * ============================================
+ */
+package com.payrollbackend.controller;
+
+import com.payrollbackend.dto.ApprovalBatchListDTO;
+import com.payrollbackend.service.PayrollBatchService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+@CrossOrigin(origins = "http://localhost:3000")
+@RestController
+@RequestMapping("/api/approvals")
+public class ApprovalsController {
+
+    private final PayrollBatchService payrollBatchService;
+
+    @Autowired
+    public ApprovalsController(PayrollBatchService payrollBatchService) {
+        this.payrollBatchService = payrollBatchService;
+    }
+
+    // GET pending approval batches
+    @GetMapping
+    public List<ApprovalBatchListDTO> getPendingApprovals() {
+        return payrollBatchService.getPendingApprovalBatches();
+    }
+
+    // You can add additional endpoints as needed for approve/reject, etc.
+    // They will automatically be protected by Spring Security (APPROVER only)
+}
+
+ApprovalWorkflowController
+package com.payrollbackend.controller;
+
+import com.payrollbackend.dto.ApprovalWorkflowDTO;
+import com.payrollbackend.model.ApprovalWorkflow;
+import com.payrollbackend.service.ApprovalWorkflowService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+
+@CrossOrigin(origins = "http://localhost:3000")
+@RestController
+@RequestMapping("")
+public class ApprovalWorkflowController {
+
+    private final ApprovalWorkflowService approvalService;
+
+    @Autowired
+    public ApprovalWorkflowController(ApprovalWorkflowService approvalService) {
+        this.approvalService = approvalService;
+    }
+
+    // CREATE approval workflow
+    @PostMapping
+    public ApprovalWorkflow createApproval(@RequestBody ApprovalWorkflow approval) {
+        return approvalService.createApprovalWorkflow(approval);
+    }
+
+    // GET all approvals
+    @GetMapping
+    public List<ApprovalWorkflowDTO> getAllApprovals() {
+        return approvalService.getAllApprovals();
+    }
+
+    // GET approvals by batch reference
+    @GetMapping("/batch/{batchReference}")
+    public List<ApprovalWorkflowDTO> getApprovalsByBatch(@PathVariable String batchReference) {
+        return approvalService.getApprovalsByBatch(batchReference);
+    }
+
+    // GET pending approvals
+    @GetMapping("/pending")
+    public List<ApprovalWorkflowDTO> getPendingApprovals() {
+        return approvalService.getPendingApprovals();
+    }
+
+    // APPROVE batch
+    @PutMapping("/{id}/approve")
+    public ApprovalWorkflow approveBatch(@PathVariable Long id, @RequestBody Map<String, String> payload) {
+        return approvalService.approveBatch(id, payload.get("approverName"), payload.get("comments"));
+    }
+
+    // REJECT batch
+    @PutMapping("/{id}/reject")
+    public ApprovalWorkflow rejectBatch(@PathVariable Long id, @RequestBody Map<String, String> payload) {
+        return approvalService.rejectBatch(id, payload.get("approverName"), payload.get("comments"));
+    }
+
+    // RETURN batch for authorization
+    @PutMapping("/{id}/return")
+    public ApprovalWorkflow returnBatch(@PathVariable Long id, @RequestBody Map<String, String> payload) {
+        return approvalService.returnBatch(id, payload.get("approverName"), payload.get("comments"));
+    }
+}
+
+AuthController
+package com.payrollbackend.controller;
+
+import com.payrollbackend.config.JwtService;
+import com.payrollbackend.dto.LoginRequest;
+import com.payrollbackend.dto.LoginResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+
+@RestController
+@RequestMapping("/api/auth")
+@CrossOrigin(origins = "http://localhost:3000")
+public class AuthController {
+
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
+
+    @Autowired
+    public AuthController(AuthenticationManager authenticationManager, JwtService jwtService) {
+        this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+        );
+        String username = authentication.getName();
+        List<String> roles = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .map(auth -> auth.startsWith("ROLE_") ? auth.substring(5) : auth)
+                .toList();
+        String token = jwtService.generateToken(username, roles);
+        return ResponseEntity.ok(new LoginResponse(token, username, roles));
+    }
+}
+
+HomeDashboardController
+// src/main/java/com/payrollbackend/controller/HomeDashboardController.java
+package com.payrollbackend.controller;
+
+import com.payrollbackend.dto.HomeDashboardDTO;
+import com.payrollbackend.service.HomeDashboardService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+@CrossOrigin(origins = "http://localhost:3000")
+
+@RestController
+@RequestMapping("/api/dashboard")
+public class HomeDashboardController {
+    @Autowired
+    private HomeDashboardService dashboardService;
+
+    @GetMapping
+    public HomeDashboardDTO homeDashboard() {
+        return dashboardService.getDashboard();
+    }
+}
+
+PaymentsController
+/*
+ * ============================================
+ * PAGE: PAYMENTS
+ * PACKAGE: com.payrollbackend.controller
+ * PURPOSE: Payments REST endpoints for payroll batches
+ * ============================================
+ */
+package com.payrollbackend.controller;
+
+import com.payrollbackend.model.PayrollBatchPayment;
+import com.payrollbackend.repository.PayrollBatchPaymentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@CrossOrigin(origins = "http://localhost:3000")
+@RestController
+@RequestMapping("/api/payments")
+public class PaymentsController {
+
+    private final PayrollBatchPaymentRepository paymentRepo;
+
+    @Autowired
+    public PaymentsController(PayrollBatchPaymentRepository paymentRepo) {
+        this.paymentRepo = paymentRepo;
+    }
+
+    @GetMapping
+    public List<PayrollBatchPayment> getPayments(@RequestParam(value = "batchReference", required = false) String batchReference) {
+        if (batchReference != null && !batchReference.isBlank()) {
+            return paymentRepo.findByBatch_BatchReference(batchReference);
+        }
+        return paymentRepo.findAll();
+    }
+}
+
+
+PayrollBatchController
+
+
+
+
+
+
