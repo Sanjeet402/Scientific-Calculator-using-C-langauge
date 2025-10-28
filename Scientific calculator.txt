@@ -1,1 +1,372 @@
+DataSeeder
+package com.payrollbackend.config;
+
+import com.payrollbackend.model.Account;
+import com.payrollbackend.repository.AccountRepository;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Configuration
+public class DataSeeder {
+
+    @Bean
+    CommandLineRunner seedAccounts(AccountRepository accountRepository) {
+        return args -> {
+            if (accountRepository.count() == 0) {
+                Account inr = new Account();
+                inr.setName("Main INR Account");
+                inr.setBank("Indian Bank");
+                inr.setNumber("INR-001");
+                inr.setCurrency("INR");
+                inr.setDescription("Primary INR settlement account");
+                inr.setBalance(new BigDecimal("1000000.00"));
+                inr.setLastUpdated(LocalDateTime.now());
+
+                Account usd = new Account();
+                usd.setName("USD Nostro");
+                usd.setBank("Bank of America");
+                usd.setNumber("USD-001");
+                usd.setCurrency("USD");
+                usd.setDescription("USD account for international payrolls");
+                usd.setBalance(new BigDecimal("500000.00"));
+                usd.setLastUpdated(LocalDateTime.now());
+
+                Account eur = new Account();
+                eur.setName("EUR Nostro");
+                eur.setBank("Deutsche Bank");
+                eur.setNumber("EUR-001");
+                eur.setCurrency("EUR");
+                eur.setDescription("EUR account for SEPA payments");
+                eur.setBalance(new BigDecimal("300000.00"));
+                eur.setLastUpdated(LocalDateTime.now());
+
+                accountRepository.save(inr);
+                accountRepository.save(usd);
+                accountRepository.save(eur);
+            }
+        };
+    }
+}
+
+JwtAuthenticationFilter
+package com.payrollbackend.config;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private final JwtService jwtService;
+    private final UserDetailsService userDetailsService;
+
+    public JwtAuthenticationFilter(JwtService jwtService, UserDetailsService userDetailsService) {
+        this.jwtService = jwtService;
+        this.userDetailsService = userDetailsService;
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
+        System.out.println(">>> JwtAuthenticationFilter invoked for " + request.getMethod() + " " + request.getRequestURI());
+
+        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+        // ✅ No token, move to next filter
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        final String jwt = authHeader.substring(7);
+        final String username = jwtService.extractUsername(jwt);
+
+        // ✅ Continue only if user is not already authenticated
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+            if (jwtService.isTokenValid(jwt, userDetails.getUsername())) {
+
+                List<String> rolesFromJwt = jwtService.extractRoles(jwt);
+                if (rolesFromJwt == null) rolesFromJwt = Collections.emptyList();
+
+                // ✅ Normalize authorities to Spring format (ROLE_ prefix)
+                List<SimpleGrantedAuthority> authorities = rolesFromJwt.stream()
+                        .map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role)
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList());
+
+                // ✅ Debug log to verify what’s happening
+
+
+                // ✅ Create authentication token for Spring Security context
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+        }
+
+        // ✅ Continue filter chain
+        filterChain.doFilter(request, response);
+    }
+}
+
+JwtService
+package com.payrollbackend.config;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.security.Key;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
+@Service
+public class JwtService {
+
+    @Value("${app.jwt.secret:ZmFrZV9wYXlyb2xsX2Jha2VuZF9zZWNyZXRfMjpzZWVk}")
+    private String secret;
+
+    @Value("${app.jwt.expirationMillis:86400000}") // 24h
+    private long expirationMillis;
+
+    private Key getSigningKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
+
+    public List<String> extractRoles(String token) {
+        Claims claims = extractAllClaims(token);
+        Object roles = claims.get("roles");
+        if (roles instanceof List<?> list) {
+            return list.stream().map(String::valueOf).toList();
+        }
+        return List.of();
+    }
+
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
+
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    public String generateToken(String username, List<String> roles) {
+        long now = System.currentTimeMillis();
+        return Jwts.builder()
+                .setSubject(username)
+                .addClaims(Map.of("roles", roles))
+                .setIssuedAt(new Date(now))
+                .setExpiration(new Date(now + expirationMillis))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public boolean isTokenValid(String token, String expectedUsername) {
+        final String username = extractUsername(token);
+        return username.equals(expectedUsername) && !isTokenExpired(token);
+    }
+
+    private boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+    private Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
+}
+
+OpenApiConfig
+package com.payrollbackend.config;
+
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class OpenApiConfig {
+
+    @Bean
+    public OpenAPI api() {
+        final String securitySchemeName = "bearerAuth";
+        return new OpenAPI()
+                .info(new Info().title("Payroll Backend API").version("v1"))
+                .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
+                .components(new Components()
+                        .addSecuritySchemes(securitySchemeName, new SecurityScheme()
+                                .name(securitySchemeName)
+                                .type(SecurityScheme.Type.HTTP)
+                                .scheme("bearer")
+                                .bearerFormat("JWT")
+                        )
+                );
+    }
+}
+
+SecurityConfig
+package com.payrollbackend.config;
+
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.CorsConfigurationSource;
+
+import java.util.List;
+
+@Configuration
+@EnableMethodSecurity
+public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthFilter;
+
+    public SecurityConfig(@Lazy JwtAuthenticationFilter jwtAuthFilter) {
+        this.jwtAuthFilter = jwtAuthFilter;
+    }
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // frontend origin
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .cors(cors -> cors
+                        .configurationSource(corsConfigurationSource()) // <-- reference to your CorsConfigurationSource bean
+                )
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/login").permitAll()
+                        // Swagger UI and OpenAPI docs
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // OPERATOR access
+                        .requestMatchers(HttpMethod.POST, "/api/batch/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/batch", "/api/batch/**").hasRole("OPERATOR")
+                        // ACCOUNTS access
+                        .requestMatchers("/api/accounts/**").hasAnyRole("OPERATOR", "APPROVER")
+                        // ACCOUNT STATEMENT access
+                        .requestMatchers("/api/account-statement/**").hasAnyRole("OPERATOR", "APPROVER")
+                        // APPROVER access
+                        .requestMatchers("/api/approvals/**").hasRole("APPROVER")
+                        .requestMatchers("/api/batch/manage/**").hasRole("APPROVER")
+                        .requestMatchers("/api/batch/approval/**").hasRole("APPROVER")
+                        .requestMatchers("/api/dashboard/**").hasAnyRole("OPERATOR", "APPROVER")
+
+                        // everything else requires authentication
+                        .anyRequest().authenticated()
+
+                )
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        return http.build();
+    }
+
+    // Demo in-memory users; replace with persistent users later
+    @Bean
+    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
+        var operator = User.withUsername("operator")
+                .password(passwordEncoder.encode("password"))
+                .roles("OPERATOR")
+                .build();
+        var approver = User.withUsername("approver")
+                .password(passwordEncoder.encode("password"))
+                .roles("APPROVER")
+                .build();
+        return new InMemoryUserDetailsManager(operator, approver);
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+        return provider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
+    }
+}
+
+
+
+
+
+
+
 
