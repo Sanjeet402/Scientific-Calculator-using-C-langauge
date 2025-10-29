@@ -1,1 +1,53 @@
 
+
+<footer style={{
+        background: 'linear-gradient(135deg, #00539f 0%, #003d75 100%)',
+        color: 'white',
+        padding: '50px 0 20px',
+        marginTop: '60px',
+        marginLeft: 'calc(-100vw / 2 + 50%)',
+        marginRight: 'calc(-100vw / 2 + 50%)',
+        marginBottom: '0',
+        width: '100vw'
+      }}>
+        <div className="container-fluid px-5">
+          <div className="row">
+            <div className="col-md-4 mb-4 mb-md-0">
+              <p style={{ fontSize: '0.95rem', lineHeight: '1.7', color: 'rgba(255, 255, 255, 0.85)' }}>
+                Delivering trusted financial services that connect people, ideas, and opportunities worldwide.
+              </p>
+            </div>
+            <div className="col-md-4 mb-4 mb-md-0">
+              <h6 style={{ color: 'white', fontWeight: '600', marginBottom: '20px', fontSize: '1.1rem' }}>Customer Service</h6>
+              <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.95rem', marginBottom: '12px' }}>Contact Us</p>
+              <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.95rem', marginBottom: '12px' }}>FAQ</p>
+              <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.95rem', marginBottom: '12px' }}>Privacy Policy</p>
+              <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.95rem', marginBottom: '0' }}>Terms & Conditions</p>
+            </div>
+            <div className="col-md-4">
+              <h6 style={{ color: 'white', fontWeight: '600', marginBottom: '20px', fontSize: '1.1rem' }}>Contact Info</h6>
+              <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.95rem', marginBottom: '16px' }}>
+                <i className="bi bi-telephone me-2"></i>
+                1800 102 7722
+              </p>
+              <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.95rem', marginBottom: '16px' }}>
+                <i className="bi bi-envelope me-2"></i>
+                service@sc.com
+              </p>
+              <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.95rem', marginBottom: '0' }}>
+                <i className="bi bi-clock me-2"></i>
+                Mon-Sat: 9:30 AM - 6:00 PM
+              </p>
+            </div>
+          </div>
+          <div style={{
+            borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+            marginTop: '40px',
+            paddingTop: '20px',
+            textAlign: 'center',
+            color: 'rgba(255, 255, 255, 0.7)'
+          }}>
+            © 2025 Standard Chartered Bank. All Rights Reserved.
+          </div>
+        </div>
+      </footer>
