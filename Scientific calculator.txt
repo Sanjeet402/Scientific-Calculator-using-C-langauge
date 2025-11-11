@@ -1,53 +1,17 @@
+Subject: Brief Background
 
+Hi [Manager's Name],
 
-<footer style={{
-        background: 'linear-gradient(135deg, #00539f 0%, #003d75 100%)',
-        color: 'white',
-        padding: '50px 0 20px',
-        marginTop: '60px',
-        marginLeft: 'calc(-100vw / 2 + 50%)',
-        marginRight: 'calc(-100vw / 2 + 50%)',
-        marginBottom: '0',
-        width: '100vw'
-      }}>
-        <div className="container-fluid px-5">
-          <div className="row">
-            <div className="col-md-4 mb-4 mb-md-0">
-              <p style={{ fontSize: '0.95rem', lineHeight: '1.7', color: 'rgba(255, 255, 255, 0.85)' }}>
-                Delivering trusted financial services that connect people, ideas, and opportunities worldwide.
-              </p>
-            </div>
-            <div className="col-md-4 mb-4 mb-md-0">
-              <h6 style={{ color: 'white', fontWeight: '600', marginBottom: '20px', fontSize: '1.1rem' }}>Customer Service</h6>
-              <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.95rem', marginBottom: '12px' }}>Contact Us</p>
-              <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.95rem', marginBottom: '12px' }}>FAQ</p>
-              <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.95rem', marginBottom: '12px' }}>Privacy Policy</p>
-              <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.95rem', marginBottom: '0' }}>Terms & Conditions</p>
-            </div>
-            <div className="col-md-4">
-              <h6 style={{ color: 'white', fontWeight: '600', marginBottom: '20px', fontSize: '1.1rem' }}>Contact Info</h6>
-              <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.95rem', marginBottom: '16px' }}>
-                <i className="bi bi-telephone me-2"></i>
-                1800 102 7722
-              </p>
-              <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.95rem', marginBottom: '16px' }}>
-                <i className="bi bi-envelope me-2"></i>
-                service@sc.com
-              </p>
-              <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.95rem', marginBottom: '0' }}>
-                <i className="bi bi-clock me-2"></i>
-                Mon-Sat: 9:30 AM - 6:00 PM
-              </p>
-            </div>
-          </div>
-          <div style={{
-            borderTop: '1px solid rgba(255, 255, 255, 0.2)',
-            marginTop: '40px',
-            paddingTop: '20px',
-            textAlign: 'center',
-            color: 'rgba(255, 255, 255, 0.7)'
-          }}>
-            © 2025 Standard Chartered Bank. All Rights Reserved.
-          </div>
-        </div>
-      </footer>
+Certainly. As requested, here is a brief background about myself. I've also attached my passport photo as requested.
+
+I completed my B.Tech in Computer Science from  SRM AP UNIVERSITY. My academic studies gave me a solid foundation in software engineering principles.
+
+Following that, I joined SCB as an apprentice, where I recently completed my training in Full Stack Development. My training covered backend development with Java and key Spring modules like Spring Boot, Spring Data JPA, and Spring Security. For the frontend, I focused on building applications with HTML, CSS, JavaScript, and React. The program also included database management with PostgreSQL (using PgAdmin) and version control with Git.
+
+During the training, I collaborated on a payment initiation project, which allowed me to apply these technologies in a practical, team-based setting.
+
+I'm excited to be part of the team and look forward to contributing to our projects.
+
+Best regards,
+
+[Your Name]
